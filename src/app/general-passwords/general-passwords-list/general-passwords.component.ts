@@ -35,4 +35,10 @@ export class GeneralPasswordsComponent implements OnInit {
       passwordField.value = '..........';
     }
   }
+
+  onDelete(id : string){
+    this.generalPasswordDataStorageService.deleteGeneralPassword(id).subscribe(() => {
+      this.generalPasswords = this.generalPasswords.filter(x => x.id !== id);
+    })
+  }
 }

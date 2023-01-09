@@ -14,4 +14,12 @@ export class GeneralPasswordsDataStorageService {
 
     return generalPasswordObservable;
   }
+
+  deleteGeneralPassword(id : string) : Observable<any>{
+    const generalPasswordDeleteObservable = this.http.delete(
+      `https://savepass-b0a5f-default-rtdb.asia-southeast1.firebasedatabase.app/general-passwords/${id}.json`
+    );
+
+    return generalPasswordDeleteObservable;
+  }
 }
