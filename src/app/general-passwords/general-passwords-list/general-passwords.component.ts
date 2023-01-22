@@ -36,9 +36,13 @@ export class GeneralPasswordsComponent implements OnInit {
     }
   }
 
-  onDelete(id : string){
-    this.generalPasswordDataStorageService.deleteGeneralPassword(id).subscribe(() => {
-      this.generalPasswords = this.generalPasswords.filter(x => x.id !== id);
-    })
+  onDelete(id: string) {
+    this.generalPasswordDataStorageService
+      .deleteGeneralPassword(id)
+      .subscribe(() => {
+        this.generalPasswords = this.generalPasswords.filter(
+          (x) => x.id !== id
+        );
+      });
   }
 }
