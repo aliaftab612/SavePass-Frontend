@@ -5,4 +5,15 @@ import { Component } from '@angular/core';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
 })
-export class AppComponent {}
+export class AppComponent {
+  isEditMode: boolean = false;
+  editModeGeneralPasswordId: number = -1;
+
+  switchToEditMode(id: number) {
+    this.isEditMode = true;
+  }
+
+  switchToDisplayMode() {
+    this.isEditMode = false;
+  }
+}

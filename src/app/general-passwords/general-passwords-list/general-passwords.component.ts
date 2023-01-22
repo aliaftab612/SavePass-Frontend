@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { GeneralPassword } from '../general-password.model';
 import { GeneralPasswordsDataStorageService } from '../general-passwords-data-storage.service';
 
@@ -8,6 +8,7 @@ import { GeneralPasswordsDataStorageService } from '../general-passwords-data-st
   styleUrls: ['./general-passwords.component.css'],
 })
 export class GeneralPasswordsComponent implements OnInit {
+  @Output() switchEditMode = new EventEmitter<number>();
   generalPasswords: GeneralPassword[] = [];
 
   constructor(
@@ -18,7 +19,7 @@ export class GeneralPasswordsComponent implements OnInit {
     this.generalPasswordDataStorageService
       .getGeneralPasswords()
       .subscribe((data) => {
-        this.generalPasswords = data;
+        this.generalPasswords = Object.values(data);
       });
   }
 
@@ -44,5 +45,9 @@ export class GeneralPasswordsComponent implements OnInit {
           (x) => x.id !== id
         );
       });
+  }
+
+  addNewGeneralPassword(id: number = -1) {
+    this.switchEditMode.emit(-1);
   }
 }
