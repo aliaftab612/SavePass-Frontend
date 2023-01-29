@@ -31,4 +31,12 @@ export class GeneralPasswordsDataStorageService {
 
     return generalPasswordAddObservable;
   }
+
+  getGeneralPassword(id: string): Observable<GeneralPassword> {
+    const generalPasswordObservable = this.http.get<GeneralPassword>(
+      `https://savepass-b0a5f-default-rtdb.asia-southeast1.firebasedatabase.app/general-passwords/${id}.json`
+    );
+
+    return generalPasswordObservable;
+  }
 }

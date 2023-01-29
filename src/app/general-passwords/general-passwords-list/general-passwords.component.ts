@@ -1,4 +1,5 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Router } from '@angular/router';
 import { GeneralPassword } from '../general-password.model';
 import { GeneralPasswordsDataStorageService } from '../general-passwords-data-storage.service';
 
@@ -8,11 +9,11 @@ import { GeneralPasswordsDataStorageService } from '../general-passwords-data-st
   styleUrls: ['./general-passwords.component.css'],
 })
 export class GeneralPasswordsComponent implements OnInit {
-  @Output() switchEditMode = new EventEmitter<number>();
   generalPasswords: GeneralPassword[] = [];
 
   constructor(
-    private generalPasswordDataStorageService: GeneralPasswordsDataStorageService
+    private generalPasswordDataStorageService: GeneralPasswordsDataStorageService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -47,7 +48,11 @@ export class GeneralPasswordsComponent implements OnInit {
       });
   }
 
-  addNewGeneralPassword(id: number = -1) {
-    this.switchEditMode.emit(-1);
+  addNewGeneralPassword() {
+    this.router.navigate(['/general-passwords', 'new']);
+  }
+
+  onEdit(id: string) {
+    this.router.navigate(['/general-passwords', id, 'edit']);
   }
 }

@@ -9,6 +9,8 @@ import { SharedModule } from './shared/shared.module';
 import { GeneralPasswordsComponent } from './general-passwords/general-passwords-list/general-passwords.component';
 import { EditGeneralPasswordComponent } from './general-passwords/edit-general-password/edit-general-password.component';
 import { FormsModule } from '@angular/forms';
+import { AuthComponent } from './auth/auth.component';
+import { NotFoundComponent } from './not-found/not-found.component';
 
 @NgModule({
   declarations: [
@@ -16,6 +18,8 @@ import { FormsModule } from '@angular/forms';
     HeaderComponent,
     GeneralPasswordsComponent,
     EditGeneralPasswordComponent,
+    AuthComponent,
+    NotFoundComponent,
   ],
   imports: [
     BrowserModule,

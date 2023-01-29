@@ -2,14 +2,7 @@
 <div class="container">
   <div class="row">
     <div class="col-md-12" style="margin: 50px">
-      <app-general-passwords
-        (switchEditMode)="switchToEditMode($event)"
-        *ngIf="!isEditMode"
-      ></app-general-passwords>
-      <app-edit-general-password
-        (switchToDisplayListMode)="switchToDisplayMode()"
-        *ngIf="isEditMode"
-      ></app-edit-general-password>
+      <router-outlet></router-outlet>
     </div>
   </div>
 </div>
