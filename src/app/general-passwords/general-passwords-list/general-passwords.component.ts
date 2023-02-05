@@ -1,4 +1,10 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  OnDestroy,
+  OnInit,
+  Output,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertService } from 'src/app/alert/alert.service';
 import { GeneralPassword } from '../general-password.model';
@@ -9,7 +15,7 @@ import { GeneralPasswordsDataStorageService } from '../general-passwords-data-st
   templateUrl: './general-passwords.component.html',
   styleUrls: ['./general-passwords.component.css'],
 })
-export class GeneralPasswordsComponent implements OnInit {
+export class GeneralPasswordsComponent implements OnInit, OnDestroy {
   generalPasswords: GeneralPassword[] = [];
 
   constructor(
@@ -59,5 +65,9 @@ export class GeneralPasswordsComponent implements OnInit {
 
   onEdit(id: string) {
     this.router.navigate(['/general-passwords', id, 'edit']);
+  }
+
+  ngOnDestroy(): void {
+    this.alertService.resetAlertEvent.next();
   }
 }

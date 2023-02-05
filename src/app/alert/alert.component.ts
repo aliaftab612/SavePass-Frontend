@@ -24,58 +24,81 @@ export class AlertComponent implements OnInit, OnDestroy {
   failureImageLink: string =
     'https://firebasestorage.googleapis.com/v0/b/savepass-b0a5f.appspot.com/o/close%20(1).png?alt=media&token=231b1366-2812-428f-bea7-9780effe5178';
 
-  displayAlert: boolean = false;
-  successAlert = true;
+  displayAlert: boolean;
+  successAlert: boolean;
   alertmessage: string = '';
   successAlertEventSubscription: Subscription;
   failureAlertEventSubscription: Subscription;
+  resetAlertEventSubscription: Subscription;
   alertEndTimeoutRef: any;
 
   constructor(
     private alertService: AlertService,
     private renderer2: Renderer2
-  ) {}
+  ) {
+    this.displayAlert = alertService.getDisplayAlert();
+    this.successAlert = alertService.getSuccessAlert();
+  }
 
   ngOnInit(): void {
+    this.alertService.displayAlertVariableChanged.subscribe((value) => {
+      this.displayAlert = value;
+    });
+
+    this.alertService.successAlertVariableChanged.subscribe((value) => {
+      this.successAlert = value;
+    });
+
     this.successAlertEventSubscription =
       this.alertService.successAlertEvent.subscribe((message) => {
         this.alertmessage = message;
-        this.successAlert = true;
+        this.alertService.setSuccessAlert(true);
         this.imageLink = this.successImageLink;
         this.renderer2.setStyle(
           this.alertPopUpElement.nativeElement,
           'background-color',
           'green'
         );
-        this.displayAlert = true;
+        this.alertService.setDisplayAlert(true);
         this.setAlertEndTimeout();
       });
 
     this.failureAlertEventSubscription =
       this.alertService.failureAlertEvent.subscribe((message) => {
         this.alertmessage = message;
-        this.successAlert = false;
+        this.alertService.setSuccessAlert(false);
         this.imageLink = this.failureImageLink;
         this.renderer2.setStyle(
           this.alertPopUpElement.nativeElement,
           'background-color',
           'red'
         );
-        this.displayAlert = true;
+        this.alertService.setDisplayAlert(true);
         this.setAlertEndTimeout();
+      });
+
+    this.resetAlertEventSubscription =
+      this.alertService.resetAlertEvent.subscribe(() => {
+        this.resetAlert();
       });
   }
 
   ngOnDestroy(): void {
     this.successAlertEventSubscription.unsubscribe();
     this.failureAlertEventSubscription.unsubscribe();
+    this.resetAlertEventSubscription.unsubscribe();
     clearTimeout(this.alertEndTimeoutRef);
   }
 
   setAlertEndTimeout() {
     clearTimeout(this.alertEndTimeoutRef);
     this.alertEndTimeoutRef = setTimeout(() => {
-      this.displayAlert = false;
+      this.alertService.setDisplayAlert(false);
     }, 2000);
+  }
+
+  resetAlert() {
+    clearTimeout(this.alertEndTimeoutRef);
+    this.alertService.setDisplayAlert(false);
   }
 }

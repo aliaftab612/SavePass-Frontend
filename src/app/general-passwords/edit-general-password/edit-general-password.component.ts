@@ -1,4 +1,10 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  OnDestroy,
+  OnInit,
+  Output,
+} from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { GeneralPassword } from '../general-password.model';
 import { GeneralPasswordsDataStorageService } from '../general-passwords-data-storage.service';
@@ -12,7 +18,7 @@ import { AlertService } from 'src/app/alert/alert.service';
   templateUrl: './edit-general-password.component.html',
   styleUrls: ['./edit-general-password.component.css'],
 })
-export class EditGeneralPasswordComponent implements OnInit {
+export class EditGeneralPasswordComponent implements OnInit, OnDestroy {
   generalPassword: GeneralPassword = new GeneralPassword('', '', '', '');
   editMode: boolean = false;
   generalPasswordId: string = '';
@@ -96,5 +102,14 @@ export class EditGeneralPasswordComponent implements OnInit {
 
   onCancel() {
     this.router.navigate(['/general-passwords']);
+  }
+
+  ngOnDestroy(): void {
+    if (
+      this.alertService.getDisplayAlert() &&
+      !this.alertService.getSuccessAlert()
+    ) {
+      this.alertService.resetAlertEvent.next();
+    }
   }
 }
