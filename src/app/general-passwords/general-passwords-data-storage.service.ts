@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { catchError, Observable } from 'rxjs';
+import { AlertService } from '../alert/alert.service';
 import { GeneralPassword } from './general-password.model';
 
 @Injectable({ providedIn: 'root' })

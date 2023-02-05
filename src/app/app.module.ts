@@ -11,6 +11,8 @@ import { EditGeneralPasswordComponent } from './general-passwords/edit-general-p
 import { FormsModule } from '@angular/forms';
 import { AuthComponent } from './auth/auth.component';
 import { NotFoundComponent } from './not-found/not-found.component';
+import { AlertService } from './alert/alert.service';
+import { AlertComponent } from './alert/alert.component';
 
 @NgModule({
   declarations: [
@@ -20,6 +22,7 @@ import { NotFoundComponent } from './not-found/not-found.component';
     EditGeneralPasswordComponent,
     AuthComponent,
     NotFoundComponent,
+    AlertComponent,
   ],
   imports: [
     BrowserModule,
@@ -28,7 +31,7 @@ import { NotFoundComponent } from './not-found/not-found.component';
     HttpClientModule,
     FormsModule,
   ],
-  providers: [],
+  providers: [AlertService],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

@@ -5,7 +5,7 @@ import { GeneralPasswordsDataStorageService } from '../general-passwords-data-st
 
 import { v4 as uuidv4 } from 'uuid';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { Subject } from 'rxjs';
+import { AlertService } from 'src/app/alert/alert.service';
 
 @Component({
   selector: 'app-edit-general-password',
@@ -15,39 +15,44 @@ import { Subject } from 'rxjs';
 export class EditGeneralPasswordComponent implements OnInit {
   generalPassword: GeneralPassword = new GeneralPassword('', '', '', '');
   editMode: boolean = false;
+  generalPasswordId: string = '';
 
   constructor(
     private generalPasswordDataStorageService: GeneralPasswordsDataStorageService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private alertService: AlertService
   ) {}
 
   ngOnInit(): void {
-    let generalPasswordId: string;
-
     if (this.router.url.includes('edit')) {
       this.editMode = true;
-      generalPasswordId = this.route.snapshot.params['id'];
+      this.generalPasswordId = this.route.snapshot.params['id'];
 
       this.generalPasswordDataStorageService
-        .getGeneralPassword(generalPasswordId)
-        .subscribe((generalPassword) => {
-          if (generalPassword != null) {
-            this.generalPassword = generalPassword;
-          } else {
-            this.router.navigate(['/not-found'], {
-              queryParams: {
-                message: `General Password with ID: ${generalPasswordId} Not Found!`,
-              },
-            });
+        .getGeneralPassword(this.generalPasswordId)
+        .subscribe(
+          (generalPassword) => {
+            if (generalPassword != null) {
+              this.generalPassword = generalPassword;
+            } else {
+              this.router.navigate(['/not-found'], {
+                queryParams: {
+                  message: `General Password with ID: ${this.generalPasswordId} Not Found!`,
+                },
+              });
+            }
+          },
+          (error) => {
+            this.alertService.failureAlertEvent.next(error.message);
           }
-        });
+        );
     }
   }
 
   saveGeneralPassword(form: NgForm) {
     if (form.valid === true) {
-      if (this.generalPassword.id === '') {
+      if (this.generalPasswordId === '') {
         this.generalPasswordDataStorageService
           .addGeneralPassword(
             new GeneralPassword(
@@ -57,22 +62,34 @@ export class EditGeneralPasswordComponent implements OnInit {
               form.value.password
             )
           )
-          .subscribe(() => {
-            this.router.navigate(['/general-passwords']);
-          });
+          .subscribe(
+            () => {
+              this.router.navigate(['/general-passwords']);
+              this.alertService.successAlertEvent.next('Created Successfully!');
+            },
+            (error) => {
+              this.alertService.failureAlertEvent.next(error.message);
+            }
+          );
       } else {
         this.generalPasswordDataStorageService
           .addGeneralPassword(
             new GeneralPassword(
-              this.generalPassword.id,
+              this.generalPasswordId,
               form.value.website,
               form.value.username,
               form.value.password
             )
           )
-          .subscribe(() => {
-            this.router.navigate(['/general-passwords']);
-          });
+          .subscribe(
+            (data) => {
+              this.router.navigate(['/general-passwords']);
+              this.alertService.successAlertEvent.next('Updated Successfully!');
+            },
+            (error) => {
+              this.alertService.failureAlertEvent.next(error.message);
+            }
+          );
       }
     }
   }

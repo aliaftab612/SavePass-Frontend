@@ -1,5 +1,6 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { Router } from '@angular/router';
+import { AlertService } from 'src/app/alert/alert.service';
 import { GeneralPassword } from '../general-password.model';
 import { GeneralPasswordsDataStorageService } from '../general-passwords-data-storage.service';
 
@@ -13,15 +14,19 @@ export class GeneralPasswordsComponent implements OnInit {
 
   constructor(
     private generalPasswordDataStorageService: GeneralPasswordsDataStorageService,
-    private router: Router
+    private router: Router,
+    private alertService: AlertService
   ) {}
 
   ngOnInit(): void {
-    this.generalPasswordDataStorageService
-      .getGeneralPasswords()
-      .subscribe((data) => {
-        this.generalPasswords = Object.values(data);
-      });
+    this.generalPasswordDataStorageService.getGeneralPasswords().subscribe(
+      (data) => {
+        if (data != null) this.generalPasswords = Object.values(data);
+      },
+      (error) => {
+        this.alertService.failureAlertEvent.next(error.message);
+      }
+    );
   }
 
   copyPassword(password: string) {
