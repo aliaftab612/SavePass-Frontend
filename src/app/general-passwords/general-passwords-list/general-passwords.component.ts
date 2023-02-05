@@ -50,13 +50,17 @@ export class GeneralPasswordsComponent implements OnInit, OnDestroy {
   }
 
   onDelete(id: string) {
-    this.generalPasswordDataStorageService
-      .deleteGeneralPassword(id)
-      .subscribe(() => {
+    this.generalPasswordDataStorageService.deleteGeneralPassword(id).subscribe(
+      () => {
         this.generalPasswords = this.generalPasswords.filter(
           (x) => x.id !== id
         );
-      });
+        this.alertService.successAlertEvent.next('Deleted Successfully!');
+      },
+      (error) => {
+        this.alertService.failureAlertEvent.next(error.message);
+      }
+    );
   }
 
   addNewGeneralPassword() {
