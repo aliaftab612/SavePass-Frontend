@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AlertService } from './alert.service';
+import { faCheck, faXmark } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-alert',
@@ -17,13 +18,6 @@ import { AlertService } from './alert.service';
 export class AlertComponent implements OnInit, OnDestroy {
   @ViewChild('alertPopUp')
   alertPopUpElement: ElementRef;
-
-  successImageLink =
-    'https://firebasestorage.googleapis.com/v0/b/savepass-b0a5f.appspot.com/o/check.png?alt=media&token=b55082fb-d878-43e8-8158-1b786bb5d769';
-  imageLink: string = this.successImageLink;
-  failureImageLink: string =
-    'https://firebasestorage.googleapis.com/v0/b/savepass-b0a5f.appspot.com/o/close%20(1).png?alt=media&token=231b1366-2812-428f-bea7-9780effe5178';
-
   displayAlert: boolean;
   successAlert: boolean;
   alertmessage: string = '';
@@ -31,6 +25,7 @@ export class AlertComponent implements OnInit, OnDestroy {
   failureAlertEventSubscription: Subscription;
   resetAlertEventSubscription: Subscription;
   alertEndTimeoutRef: any;
+  alertIcon = faCheck;
 
   constructor(
     private alertService: AlertService,
@@ -53,7 +48,7 @@ export class AlertComponent implements OnInit, OnDestroy {
       this.alertService.successAlertEvent.subscribe((message) => {
         this.alertmessage = message;
         this.alertService.setSuccessAlert(true);
-        this.imageLink = this.successImageLink;
+        this.alertIcon = faCheck;
         this.renderer2.setStyle(
           this.alertPopUpElement.nativeElement,
           'background-color',
@@ -67,7 +62,7 @@ export class AlertComponent implements OnInit, OnDestroy {
       this.alertService.failureAlertEvent.subscribe((message) => {
         this.alertmessage = message;
         this.alertService.setSuccessAlert(false);
-        this.imageLink = this.failureImageLink;
+        this.alertIcon = faXmark;
         this.renderer2.setStyle(
           this.alertPopUpElement.nativeElement,
           'background-color',

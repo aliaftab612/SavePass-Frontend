@@ -13,6 +13,7 @@ import { AuthComponent } from './auth/auth.component';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { AlertService } from './alert/alert.service';
 import { AlertComponent } from './alert/alert.component';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @NgModule({
   declarations: [
@@ -30,6 +31,7 @@ import { AlertComponent } from './alert/alert.component';
     SharedModule,
     HttpClientModule,
     FormsModule,
+    FontAwesomeModule,
   ],
   providers: [AlertService],
   bootstrap: [AppComponent],
