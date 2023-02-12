@@ -1,4 +1,54 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light p-2">
+<div
+  style="
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background-color: rgba(248, 249, 250, 1);
+    padding: 20px;
+    height: 107px;
+  "
+>
+  <a style="cursor: pointer; font-weight: bold; font-size: larger">SavePass</a>
+  <a *ngIf="!authenticated" class="nav-link active" style="cursor: pointer"
+    >Authenticate</a
+  >
+  <a
+    *ngIf="authenticated"
+    class="nav-link"
+    routerLink="general-passwords"
+    routerLinkActive="active"
+    style="cursor: pointer"
+    >General-Passwords</a
+  >
+  <div *ngIf="authenticated" style="cursor: pointer; margin-left: auto">
+    <nav class="navbar navbar-expand-sm">
+      <div class="navbar-collapse">
+        <ul class="navbar-nav">
+          <li class="nav-item dropdown">
+            <a appDropDown style="cursor: pointer" class="nav-link">
+              <span class=""></span>
+              <img
+                src="https://play-lh.googleusercontent.com/ZyWNGIfzUyoajtFcD7NhMksHEZh37f-MkHVGr5Yfefa-IX7yj9SMfI82Z7a2wpdKCA=w240-h480-rw"
+                alt="..."
+                class="border border-1 border-dark rounded-circle"
+                width="35"
+                style="cursor: pointer"
+                height="35"
+              />
+            </a>
+            <div
+              class="dropdown-menu"
+              style="right: 0; left: auto; position: absolute"
+            >
+              <a class="dropdown-item" style="cursor: pointer">Logout</a>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+</div>
+<!--<nav class="navbar navbar-expand-lg navbar-light bg-light p-2">
   <a class="navbar-brand" style="cursor: pointer">SavePass</a>
   <div class="navbar-collapse">
     <ul class="navbar-nav navbar-collapse">
@@ -36,4 +86,4 @@
       </ul>
     </div>
   </div>
-</nav>
+</nav>-->
