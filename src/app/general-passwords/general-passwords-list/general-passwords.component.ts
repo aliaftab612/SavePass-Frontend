@@ -15,6 +15,7 @@ import {
   IconDefinition,
   faCopy,
 } from '@fortawesome/free-solid-svg-icons';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 
 @Component({
   selector: 'app-general-passwords',
@@ -48,16 +49,21 @@ export class GeneralPasswordsComponent implements OnInit, OnDestroy {
     navigator.clipboard.writeText(password);
   }
 
-  togglePasswordVisibility(passwordField: HTMLInputElement, password: string) {
+  togglePasswordVisibility(
+    passwordField: HTMLInputElement,
+    password: string,
+    hiddenIconRef: FaIconComponent
+  ) {
     if (passwordField.type === 'password') {
       passwordField.type = 'text';
       passwordField.value = password;
-      this.passwordHiddenImg = faEyeSlash;
+      hiddenIconRef.icon = faEyeSlash;
     } else {
       passwordField.type = 'password';
       passwordField.value = '..........';
-      this.passwordHiddenImg = faEye;
+      hiddenIconRef.icon = faEye;
     }
+    hiddenIconRef.render();
   }
 
   onDelete(id: string) {
