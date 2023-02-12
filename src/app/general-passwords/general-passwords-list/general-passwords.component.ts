@@ -9,6 +9,12 @@ import { Router } from '@angular/router';
 import { AlertService } from 'src/app/alert/alert.service';
 import { GeneralPassword } from '../general-password.model';
 import { GeneralPasswordsDataStorageService } from '../general-passwords-data-storage.service';
+import {
+  faEye,
+  faEyeSlash,
+  IconDefinition,
+  faCopy,
+} from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-general-passwords',
@@ -17,6 +23,9 @@ import { GeneralPasswordsDataStorageService } from '../general-passwords-data-st
 })
 export class GeneralPasswordsComponent implements OnInit, OnDestroy {
   generalPasswords: GeneralPassword[] = [];
+
+  passwordHiddenImg: IconDefinition = faEye;
+  passwordCopyImg: IconDefinition = faCopy;
 
   constructor(
     private generalPasswordDataStorageService: GeneralPasswordsDataStorageService,
@@ -43,9 +52,11 @@ export class GeneralPasswordsComponent implements OnInit, OnDestroy {
     if (passwordField.type === 'password') {
       passwordField.type = 'text';
       passwordField.value = password;
+      this.passwordHiddenImg = faEyeSlash;
     } else {
       passwordField.type = 'password';
       passwordField.value = '..........';
+      this.passwordHiddenImg = faEye;
     }
   }
 

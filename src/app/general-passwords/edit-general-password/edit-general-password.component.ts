@@ -4,6 +4,7 @@ import {
   OnDestroy,
   OnInit,
   Output,
+  ViewChild,
 } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { GeneralPassword } from '../general-password.model';
@@ -57,6 +58,7 @@ export class EditGeneralPasswordComponent implements OnInit, OnDestroy {
   }
 
   saveGeneralPassword(form: NgForm) {
+    console.log(form);
     if (form.valid === true) {
       if (this.generalPasswordId === '') {
         this.generalPasswordDataStorageService

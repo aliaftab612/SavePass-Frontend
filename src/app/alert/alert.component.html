@@ -9,7 +9,12 @@
       align-items: center;
     "
   >
-    <fa-icon [icon]="alertIcon" size="2xl" style="color: white"></fa-icon>
+    <fa-icon
+      [icon]="alertIcon"
+      animation="beat"
+      size="2xl"
+      style="color: white; --fa-animation-duration: 2s"
+    ></fa-icon>
     <p
       style="
         margin: 7px;
