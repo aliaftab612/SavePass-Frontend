@@ -2,15 +2,21 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, Observable } from 'rxjs';
 import { AlertService } from '../alert/alert.service';
+import { AuthService } from '../auth/auth.service';
+import { User } from '../auth/user.model';
 import { GeneralPassword } from './general-password.model';
 
 @Injectable({ providedIn: 'root' })
 export class GeneralPasswordsDataStorageService {
-  constructor(private http: HttpClient) {}
+  user: User;
+
+  constructor(private http: HttpClient, private authService: AuthService) {
+    this.user = authService.getUser();
+  }
 
   getGeneralPasswords(): Observable<GeneralPassword[]> {
     const generalPasswordObservable = this.http.get<GeneralPassword[]>(
-      'https://savepass-b0a5f-default-rtdb.asia-southeast1.firebasedatabase.app/general-passwords.json'
+      `https://savepass-b0a5f-default-rtdb.asia-southeast1.firebasedatabase.app/general-passwords/${this.user.id}.json?auth=${this.user.token}`
     );
 
     return generalPasswordObservable;
@@ -18,7 +24,7 @@ export class GeneralPasswordsDataStorageService {
 
   deleteGeneralPassword(id: string): Observable<any> {
     const generalPasswordDeleteObservable = this.http.delete(
-      `https://savepass-b0a5f-default-rtdb.asia-southeast1.firebasedatabase.app/general-passwords/${id}.json`
+      `https://savepass-b0a5f-default-rtdb.asia-southeast1.firebasedatabase.app/general-passwords/${this.user.id}/${id}.json?auth=${this.user.token}`
     );
 
     return generalPasswordDeleteObservable;
@@ -26,7 +32,7 @@ export class GeneralPasswordsDataStorageService {
 
   addGeneralPassword(generalPassword: GeneralPassword): Observable<any> {
     const generalPasswordAddObservable = this.http.put(
-      `https://savepass-b0a5f-default-rtdb.asia-southeast1.firebasedatabase.app/general-passwords/${generalPassword.id}.json`,
+      `https://savepass-b0a5f-default-rtdb.asia-southeast1.firebasedatabase.app/general-passwords/${this.user.id}/${generalPassword.id}.json?auth=${this.user.token}`,
       generalPassword
     );
 
@@ -35,7 +41,7 @@ export class GeneralPasswordsDataStorageService {
 
   getGeneralPassword(id: string): Observable<GeneralPassword> {
     const generalPasswordObservable = this.http.get<GeneralPassword>(
-      `https://savepass-b0a5f-default-rtdb.asia-southeast1.firebasedatabase.app/general-passwords/${id}.json`
+      `https://savepass-b0a5f-default-rtdb.asia-southeast1.firebasedatabase.app/general-passwords/${this.user.id}/${id}.json?auth=${this.user.token}`
     );
 
     return generalPasswordObservable;

@@ -1,1 +1,65 @@
-<p>auth works!</p>
+<div style="display: flex; justify-content: center">
+  <div
+    style="
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      margin: 50px;
+      flex: 0 500px;
+    "
+  >
+    <h2 style="text-align: center">
+      {{ loginMode ? "Login" : "Sign Up" }}
+    </h2>
+    <hr />
+    <form #form="ngForm">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input
+          class="form-control"
+          id="username"
+          required
+          ngModel
+          name="username"
+          #username="ngModel"
+        />
+        <div *ngIf="!username.valid && username.touched" style="color: red">
+          * This field is required.
+        </div>
+        <label for="password" style="margin-top: 30px">Password</label>
+        <input
+          class="form-control"
+          type="password"
+          id="password"
+          required
+          ngModel
+          name="password"
+          #password="ngModel"
+        />
+        <div *ngIf="!password.valid && password.touched" style="color: red">
+          * This field is required.
+        </div>
+      </div>
+      <br />
+      <div
+        style="
+          display: flex;
+          gap: 1rem;
+          justify-content: center;
+          margin-top: 5px;
+        "
+      >
+        <button
+          [disabled]="!form.valid"
+          class="btn btn-success"
+          (click)="onAuthenticationClick(form)"
+        >
+          {{ loginMode ? "Login" : "Save" }}
+        </button>
+        <button class="btn btn-primary" (click)="SwitchAuthMode(form)">
+          {{ !loginMode ? "Back to login" : "Sign Up" }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
