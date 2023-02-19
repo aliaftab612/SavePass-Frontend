@@ -14,6 +14,7 @@ import { NotFoundComponent } from './not-found/not-found.component';
 import { AlertService } from './alert/alert.service';
 import { AlertComponent } from './alert/alert.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { CookieService } from 'ngx-cookie-service';
 
 @NgModule({
   declarations: [
@@ -33,7 +34,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
     FormsModule,
     FontAwesomeModule,
   ],
-  providers: [AlertService],
+  providers: [AlertService, CookieService],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
