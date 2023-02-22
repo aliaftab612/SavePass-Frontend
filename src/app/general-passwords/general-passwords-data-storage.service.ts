@@ -11,6 +11,13 @@ export class GeneralPasswordsDataStorageService {
 
   constructor(private http: HttpClient, private authService: AuthService) {
     this.user = authService.getUser();
+
+    this.authService.isAuthenticatedEvent.subscribe((userData: User) => {
+      if (userData !== null) {
+        this.user = userData;
+        console.log(this.user.id);
+      }
+    });
   }
 
   getGeneralPasswords(): Observable<GeneralPassword[]> {

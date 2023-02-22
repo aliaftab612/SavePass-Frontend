@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
 
@@ -15,6 +15,16 @@ import { AlertService } from './alert/alert.service';
 import { AlertComponent } from './alert/alert.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { CookieService } from 'ngx-cookie-service';
+import { AuthService } from './auth/auth.service';
+import { Observable, tap } from 'rxjs';
+
+export function initializeUserData(
+  authService: AuthService
+): () => Observable<any> {
+  return () => {
+    return authService.autoLogin;
+  };
+}
 
 @NgModule({
   declarations: [
@@ -34,7 +44,16 @@ import { CookieService } from 'ngx-cookie-service';
     FormsModule,
     FontAwesomeModule,
   ],
-  providers: [AlertService, CookieService],
+  providers: [
+    AlertService,
+    CookieService,
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeUserData,
+      deps: [AuthService],
+      multi: true,
+    },
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

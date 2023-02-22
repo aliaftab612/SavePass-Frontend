@@ -23,7 +23,7 @@ const routes: Routes = [
     component: EditGeneralPasswordComponent,
     canActivate: [AuthGuard],
   },
-  { path: '', redirectTo: '/auth', pathMatch: 'full' },
+  { path: '', redirectTo: '/general-passwords', pathMatch: 'full' },
   { path: 'not-found', component: NotFoundComponent },
   { path: '**', redirectTo: '/not-found' },
 ];

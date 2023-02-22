@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
-import { Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { AlertService } from '../alert/alert.service';
 import { User } from './user.model';
@@ -29,8 +29,31 @@ interface SignUpResponse {
 })
 export class AuthService {
   private user: User = null;
-  isAuthenticatedEvent: Subject<boolean> = new Subject<boolean>();
+  isAuthenticatedEvent: Subject<User> = new Subject<User>();
   private autoLogoutTimer: any;
+
+  autoLogin = new Observable((subscriber) => {
+    if (this.refershToken() != null) {
+      this.refershToken().subscribe(
+        (authData) => {
+          this.getUserData(authData.id_token).subscribe(
+            (userData) => {
+              this.storeUserData(userData, authData.id_token);
+              subscriber.complete();
+            },
+            () => {
+              subscriber.complete();
+            }
+          );
+        },
+        () => {
+          subscriber.complete();
+        }
+      );
+    } else {
+      subscriber.complete();
+    }
+  });
 
   constructor(
     private http: HttpClient,
@@ -46,24 +69,8 @@ export class AuthService {
         { email, password, returnSecureToken: true }
       )
       .subscribe(
-        (userData: LoginResponse) => {
-          this.user = new User(
-            userData.email,
-            userData.localId,
-            userData.idToken,
-            new Date(Date.now() + Number(userData.expiresIn) * 1000).getTime()
-          );
-          this.cookies.set(
-            'userData',
-            JSON.stringify(this.user),
-            new Date(Date.now() + Number(userData.expiresIn) * 1000),
-            null,
-            null,
-            true
-          );
-          this.isAuthenticatedEvent.next(this.isAuthenticated());
-          this.autoLogout(Number(userData.expiresIn) * 1000);
-          this.router.navigate(['general-passwords']);
+        (data: LoginResponse) => {
+          this.initAppAfterAuthentication(data);
         },
         (error) => {
           this.alertService.failureAlertEvent.next(error.error.error.message);
@@ -78,24 +85,8 @@ export class AuthService {
         { email, password, returnSecureToken: true }
       )
       .subscribe(
-        (userData: SignUpResponse) => {
-          this.user = new User(
-            userData.email,
-            userData.localId,
-            userData.idToken,
-            new Date(Date.now() + Number(userData.expiresIn) * 1000).getTime()
-          );
-          this.cookies.set(
-            'userData',
-            JSON.stringify(this.user),
-            new Date(Date.now() + Number(userData.expiresIn) * 1000),
-            null,
-            null,
-            true
-          );
-          this.isAuthenticatedEvent.next(this.isAuthenticated());
-          this.autoLogout(Number(userData.expiresIn) * 1000);
-          this.router.navigate(['general-passwords']);
+        (data: SignUpResponse) => {
+          this.initAppAfterAuthentication(data);
         },
         (error) => {
           this.alertService.failureAlertEvent.next(error.error.error.message);
@@ -103,39 +94,99 @@ export class AuthService {
       );
   }
 
-  isAuthenticated() {
-    if (this.user) {
-      return true;
-    } else if (this.cookies.check('userData')) {
-      this.user = JSON.parse(this.cookies.get('userData'));
-      return true;
-    }
-    return false;
+  getUserData(idToken: string): Observable<any> {
+    return this.http.post<any>(
+      `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${environment.firebaseApiKey}`,
+      { idToken }
+    );
+  }
+
+  storeUserData(userData: any, idToken: string) {
+    this.user = new User(
+      userData.users[0].email,
+      userData.users[0].localId,
+      idToken,
+      userData.users[0].displayName,
+      userData.users[0].photoUrl
+    );
+  }
+
+  initAppAfterAuthentication(authData: any) {
+    this.cookies.set(
+      'refreshToken',
+      authData.refreshToken,
+      365,
+      null,
+      null,
+      true
+    );
+    this.autoLogout(Number(authData.expiresIn) * 1000);
+
+    this.getUserData(authData.idToken).subscribe(
+      (userData: any) => {
+        this.storeUserData(userData, authData.idToken);
+        this.isAuthenticatedEvent.next(Object.create(this.user));
+        this.router.navigate(['general-passwords']);
+      },
+      (error) => {
+        this.alertService.failureAlertEvent.next(error.error.error.message);
+        this.clearAutoLogoutTimer();
+      }
+    );
   }
 
   logout() {
     this.user = null;
-    this.cookies.delete('userData');
+    this.cookies.delete('refreshToken');
     this.router.navigate(['auth']);
-    this.isAuthenticatedEvent.next(this.isAuthenticated());
-    if (this.autoLogoutTimer) {
-      clearTimeout(this.autoLogoutTimer);
-    }
-    this.autoLogoutTimer = null;
+    this.isAuthenticatedEvent.next(null);
+    this.clearAutoLogoutTimer();
   }
 
   autoLogout(time: number) {
-    this.autoLogoutTimer = setTimeout(() => this.logout(), time);
+    this.autoLogoutTimer = setTimeout(() => {
+      this.refershToken() == null
+        ? this.logout()
+        : this.refershToken().subscribe(
+            (data) => {
+              this.user.token = data.id_token;
+              this.isAuthenticatedEvent.next(Object.create(this.user));
+              this.autoLogout(Number(data.expires_in) * 1000);
+            },
+            (error) => {
+              this.logout();
+              this.alertService.failureAlertEvent.next(
+                error.error.error.message
+              );
+            }
+          );
+    }, time);
   }
 
-  autoLogin() {
-    if (this.isAuthenticated()) {
-      this.autoLogout(this.user.tokenExpireMillisecondsDate - Date.now());
-      this.router.navigate(['general-passwords']);
+  refershToken(): Observable<any> {
+    if (this.cookies.check('refreshToken')) {
+      const refreshToken = this.cookies.get('refreshToken');
+
+      return this.http.post<any>(
+        `https://securetoken.googleapis.com/v1/token?key=${environment.firebaseApiKey}`,
+        { grant_type: 'refresh_token', refresh_token: refreshToken }
+      );
+    } else {
+      return null;
     }
   }
 
   getUser(): User {
-    return Object.create(this.user);
+    if (this.user !== null) {
+      return Object.create(this.user);
+    }
+    return null;
+  }
+
+  clearAutoLogoutTimer() {
+    if (this.autoLogoutTimer) {
+      clearTimeout(this.autoLogoutTimer);
+    }
+    this.autoLogoutTimer = null;
   }
 }
