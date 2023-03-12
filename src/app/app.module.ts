@@ -17,6 +17,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { CookieService } from 'ngx-cookie-service';
 import { AuthService } from './auth/auth.service';
 import { Observable, tap } from 'rxjs';
+import { UpdateProfileComponent } from './update-profile/update-profile.component';
 
 export function initializeUserData(
   authService: AuthService
@@ -35,6 +36,7 @@ export function initializeUserData(
     AuthComponent,
     NotFoundComponent,
     AlertComponent,
+    UpdateProfileComponent,
   ],
   imports: [
     BrowserModule,

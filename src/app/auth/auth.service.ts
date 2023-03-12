@@ -86,7 +86,7 @@ export class AuthService {
       )
       .subscribe(
         (data: SignUpResponse) => {
-          this.initAppAfterAuthentication(data);
+          this.initAppAfterAuthentication(data, true);
         },
         (error) => {
           this.alertService.failureAlertEvent.next(error.error.error.message);
@@ -101,17 +101,45 @@ export class AuthService {
     );
   }
 
-  storeUserData(userData: any, idToken: string) {
-    this.user = new User(
-      userData.users[0].email,
-      userData.users[0].localId,
-      idToken,
-      userData.users[0].displayName,
-      userData.users[0].photoUrl
-    );
+  updateUserData(firstName: string, lastName: string, profilePhotoUrl: string) {
+    const displayName =
+      lastName !== '' ? firstName + ' ' + lastName : firstName;
+    const idToken = this.user.token;
+
+    this.http
+      .post<any>(
+        `https://identitytoolkit.googleapis.com/v1/accounts:update?key=${environment.firebaseApiKey}`,
+        { idToken, displayName, photoUrl: profilePhotoUrl }
+      )
+      .subscribe(
+        (userProfileResponse: any) => {
+          this.storeUserData(userProfileResponse, idToken, true);
+          this.isAuthenticatedEvent.next(Object.create(this.user));
+          this.router.navigate(['general-passwords']);
+          this.alertService.successAlertEvent.next('Updated Successfully!');
+        },
+        (error) => {
+          this.alertService.failureAlertEvent.next(error.error.error.message);
+        }
+      );
   }
 
-  initAppAfterAuthentication(authData: any) {
+  storeUserData(userData: any, idToken: string, isSignUp: boolean = false) {
+    if (isSignUp) {
+      this.user.name = userData.displayName;
+      this.user.photoUrl = userData.photoUrl;
+    } else {
+      this.user = new User(
+        userData.users[0].email,
+        userData.users[0].localId,
+        idToken,
+        userData.users[0].displayName,
+        userData.users[0].photoUrl
+      );
+    }
+  }
+
+  initAppAfterAuthentication(authData: any, isSignUp = false) {
     this.cookies.set(
       'refreshToken',
       authData.refreshToken,
@@ -122,11 +150,19 @@ export class AuthService {
     );
     this.autoLogout(Number(authData.expiresIn) * 1000);
 
-    this.getUserData(authData.idToken).subscribe(
+    let userDataObservable = this.getUserData(authData.idToken);
+
+    userDataObservable.subscribe(
       (userData: any) => {
         this.storeUserData(userData, authData.idToken);
         this.isAuthenticatedEvent.next(Object.create(this.user));
-        this.router.navigate(['general-passwords']);
+        if (isSignUp) {
+          this.router.navigate(['update-profile'], {
+            queryParams: { issignup: true },
+          });
+        } else {
+          this.router.navigate(['general-passwords']);
+        }
       },
       (error) => {
         this.alertService.failureAlertEvent.next(error.error.error.message);

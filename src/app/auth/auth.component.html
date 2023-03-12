@@ -14,7 +14,7 @@
     <hr />
     <form #form="ngForm">
       <div class="form-group">
-        <label for="username">Username</label>
+        <label for="username" style="margin-top: 30px">Username</label>
         <input
           class="form-control"
           id="username"
@@ -36,8 +36,45 @@
           name="password"
           #password="ngModel"
         />
-        <div *ngIf="!password.valid && password.touched" style="color: red">
+        <div
+          *ngIf="password.getError('required') && password.touched"
+          style="color: red"
+        >
           * This field is required.
+        </div>
+        <div *ngIf="!loginMode">
+          <label for="confirmPassword" style="margin-top: 30px"
+            >Confirm Password</label
+          >
+          <input
+            class="form-control"
+            type="password"
+            id="confirmPassword"
+            required
+            [pattern]="form.value.password"
+            ngModel
+            name="confirmPassword"
+            #confirmPassword="ngModel"
+          />
+          <div
+            *ngIf="
+              confirmPassword.getError('required') && confirmPassword.touched
+            "
+            style="color: red"
+          >
+            * This field is required.
+          </div>
+          <div
+            *ngIf="
+              confirmPassword.getError('pattern') &&
+              password.value !== '' &&
+              confirmPassword.value !== '' &&
+              confirmPassword.touched
+            "
+            style="color: red"
+          >
+            * Confirm password and password does not match.
+          </div>
         </div>
       </div>
       <br />
@@ -54,7 +91,7 @@
           class="btn btn-success"
           (click)="onAuthenticationClick(form)"
         >
-          {{ loginMode ? "Login" : "Save" }}
+          {{ loginMode ? "Login" : "Create Account" }}
         </button>
         <button class="btn btn-primary" (click)="SwitchAuthMode(form)">
           {{ !loginMode ? "Back to login" : "Sign Up" }}

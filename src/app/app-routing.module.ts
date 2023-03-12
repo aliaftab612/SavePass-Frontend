@@ -5,9 +5,15 @@ import { AuthGuard } from './auth/auth.guard';
 import { EditGeneralPasswordComponent } from './general-passwords/edit-general-password/edit-general-password.component';
 import { GeneralPasswordsComponent } from './general-passwords/general-passwords-list/general-passwords.component';
 import { NotFoundComponent } from './not-found/not-found.component';
+import { UpdateProfileComponent } from './update-profile/update-profile.component';
 
 const routes: Routes = [
   { path: 'auth', component: AuthComponent },
+  {
+    path: 'update-profile',
+    component: UpdateProfileComponent,
+    canActivate: [AuthGuard],
+  },
   {
     path: 'general-passwords',
     component: GeneralPasswordsComponent,

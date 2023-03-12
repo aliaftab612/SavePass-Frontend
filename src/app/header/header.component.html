@@ -17,15 +17,24 @@
     style="cursor: pointer"
     >General-Passwords</a
   >
-  <div *ngIf="authenticated" style="cursor: pointer; margin-left: auto">
+  <div
+    *ngIf="authenticated"
+    style="display: flex; align-items: center; margin-left: auto"
+  >
+    <div *ngIf="user.name && user.name != ''" style="margin-right: 8px">
+      {{ user.name }}
+    </div>
     <nav class="navbar navbar-expand-sm">
       <div class="navbar-collapse">
         <ul class="navbar-nav">
           <li class="nav-item dropdown">
             <a appDropDown style="cursor: pointer" class="nav-link">
-              <span class=""></span>
               <img
-                src="https://play-lh.googleusercontent.com/ZyWNGIfzUyoajtFcD7NhMksHEZh37f-MkHVGr5Yfefa-IX7yj9SMfI82Z7a2wpdKCA=w240-h480-rw"
+                [src]="
+                  user.photoUrl && user.photoUrl != ''
+                    ? user.photoUrl
+                    : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__340.png'
+                "
                 alt="..."
                 class="border border-1 border-dark rounded-circle"
                 width="35"
@@ -37,6 +46,12 @@
               class="dropdown-menu"
               style="right: 0; left: auto; position: absolute"
             >
+              <a
+                class="dropdown-item"
+                style="cursor: pointer"
+                (click)="updateProfile()"
+                >Update Profile</a
+              >
               <a
                 class="dropdown-item"
                 style="cursor: pointer"

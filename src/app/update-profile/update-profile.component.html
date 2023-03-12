@@ -1,0 +1,68 @@
+<div style="display: flex; justify-content: center">
+  <div
+    style="
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      margin: 50px;
+      flex: 0 500px;
+    "
+  >
+    <h2 style="text-align: center">Update Profile</h2>
+    <hr />
+    <form #form="ngForm">
+      <div class="form-group">
+        <label for="firstname">First Name</label>
+        <input
+          class="form-control"
+          id="firstname"
+          required
+          [ngModel]="firstName"
+          name="firstname"
+          #firstname="ngModel"
+        />
+        <div *ngIf="!firstname.valid && firstname.touched" style="color: red">
+          * This field is required.
+        </div>
+        <label for="lastname" style="margin-top: 30px">Last Name</label>
+        <input
+          class="form-control"
+          id="lastname"
+          [ngModel]="lastName"
+          name="lastname"
+          #lastname="ngModel"
+        />
+        <label for="profilePhotoURL" style="margin-top: 30px"
+          >Profile Photo URL</label
+        >
+        <input
+          class="form-control"
+          id="profilePhotoURL"
+          [ngModel]="user.photoUrl ? user.photoUrl : ''"
+          name="profilePhotoURL"
+          #profilePhotoURL="ngModel"
+        />
+      </div>
+      <br />
+      <div
+        style="
+          display: flex;
+          gap: 1rem;
+          justify-content: center;
+          margin-top: 5px;
+        "
+      >
+        <button
+          [disabled]="!form.valid"
+          class="btn btn-success"
+          (click)="updateProfile(form)"
+        >
+          Update
+        </button>
+        <button class="btn btn-primary" (click)="cancel()">
+          {{ isSignUp ? "Skip" : "Cancel" }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
