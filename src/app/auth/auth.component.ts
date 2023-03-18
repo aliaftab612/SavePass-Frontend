@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { NgForm } from '@angular/forms';
+import { NgForm, NgModel } from '@angular/forms';
 import { AlertService } from '../alert/alert.service';
 import { AuthService } from './auth.service';
 
@@ -10,6 +10,7 @@ import { AuthService } from './auth.service';
 })
 export class AuthComponent {
   loginMode: boolean = true;
+  isPasswordAndConfrimPasswordMaching = true;
 
   constructor(
     private authService: AuthService,
@@ -29,6 +30,14 @@ export class AuthComponent {
       } else {
         this.authService.signUp(form.value.username, form.value.password);
       }
+    }
+  }
+
+  setIsPasswordAndConfrimPasswordMaching(formData: NgForm) {
+    if (formData.value.password === formData.value.confirmPassword) {
+      this.isPasswordAndConfrimPasswordMaching = true;
+    } else {
+      this.isPasswordAndConfrimPasswordMaching = false;
     }
   }
 }

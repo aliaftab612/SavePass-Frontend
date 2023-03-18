@@ -116,7 +116,9 @@ export class AuthService {
           this.storeUserData(userProfileResponse, idToken, true);
           this.isAuthenticatedEvent.next(Object.create(this.user));
           this.router.navigate(['general-passwords']);
-          this.alertService.successAlertEvent.next('Updated Successfully!');
+          this.alertService.successAlertEvent.next(
+            'Profile Updated Successfully!'
+          );
         },
         (error) => {
           this.alertService.failureAlertEvent.next(error.error.error.message);

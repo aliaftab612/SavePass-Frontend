@@ -34,12 +34,10 @@
           required
           ngModel
           name="password"
+          (input)="setIsPasswordAndConfrimPasswordMaching(form)"
           #password="ngModel"
         />
-        <div
-          *ngIf="password.getError('required') && password.touched"
-          style="color: red"
-        >
+        <div *ngIf="!password.valid && password.touched" style="color: red">
           * This field is required.
         </div>
         <div *ngIf="!loginMode">
@@ -51,25 +49,22 @@
             type="password"
             id="confirmPassword"
             required
-            [pattern]="form.value.password"
             ngModel
             name="confirmPassword"
+            (input)="setIsPasswordAndConfrimPasswordMaching(form)"
             #confirmPassword="ngModel"
           />
           <div
-            *ngIf="
-              confirmPassword.getError('required') && confirmPassword.touched
-            "
+            *ngIf="!confirmPassword.valid && confirmPassword.touched"
             style="color: red"
           >
             * This field is required.
           </div>
           <div
             *ngIf="
-              confirmPassword.getError('pattern') &&
-              password.value !== '' &&
-              confirmPassword.value !== '' &&
-              confirmPassword.touched
+              !isPasswordAndConfrimPasswordMaching &&
+              password.valid &&
+              confirmPassword.valid
             "
             style="color: red"
           >
@@ -87,7 +82,7 @@
         "
       >
         <button
-          [disabled]="!form.valid"
+          [disabled]="!form.valid || !isPasswordAndConfrimPasswordMaching"
           class="btn btn-success"
           (click)="onAuthenticationClick(form)"
         >
