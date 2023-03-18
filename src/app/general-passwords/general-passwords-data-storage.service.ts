@@ -15,7 +15,6 @@ export class GeneralPasswordsDataStorageService {
     this.authService.isAuthenticatedEvent.subscribe((userData: User) => {
       if (userData !== null) {
         this.user = userData;
-        console.log(this.user.id);
       }
     });
   }

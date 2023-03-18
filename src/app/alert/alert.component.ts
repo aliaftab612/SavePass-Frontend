@@ -24,6 +24,8 @@ export class AlertComponent implements OnInit, OnDestroy {
   successAlertEventSubscription: Subscription;
   failureAlertEventSubscription: Subscription;
   resetAlertEventSubscription: Subscription;
+  displayAlertVariableChangedSubscription: Subscription;
+  successAlertVariableChangedSubscription: Subscription;
   alertEndTimeoutRef: any;
   alertIcon = faCheck;
 
@@ -36,13 +38,15 @@ export class AlertComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.alertService.displayAlertVariableChanged.subscribe((value) => {
-      this.displayAlert = value;
-    });
+    this.displayAlertVariableChangedSubscription =
+      this.alertService.displayAlertVariableChanged.subscribe((value) => {
+        this.displayAlert = value;
+      });
 
-    this.alertService.successAlertVariableChanged.subscribe((value) => {
-      this.successAlert = value;
-    });
+    this.successAlertVariableChangedSubscription =
+      this.alertService.successAlertVariableChanged.subscribe((value) => {
+        this.successAlert = value;
+      });
 
     this.successAlertEventSubscription =
       this.alertService.successAlertEvent.subscribe((message) => {
@@ -82,6 +86,8 @@ export class AlertComponent implements OnInit, OnDestroy {
     this.successAlertEventSubscription.unsubscribe();
     this.failureAlertEventSubscription.unsubscribe();
     this.resetAlertEventSubscription.unsubscribe();
+    this.successAlertVariableChangedSubscription.unsubscribe();
+    this.displayAlertVariableChangedSubscription.unsubscribe();
     clearTimeout(this.alertEndTimeoutRef);
   }
 
