@@ -1,1 +1,7 @@
-<p>{{ message !== "" ? message : "Page Not Found" }}</p>
+<div class="number">{{ message !== "" ? "500" : "404" }}</div>
+<div class="text">
+  <span>Ooops...</span><br />{{ message !== "" ? message : "Page Not Found" }}
+</div>
+<div style="margin-top: 10px; font-size: 22px; font-weight: bold">
+  <a routerLink="/general-passwords">Navigate to Home</a>
+</div>

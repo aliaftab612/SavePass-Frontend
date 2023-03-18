@@ -82,7 +82,11 @@
         "
       >
         <button
-          [disabled]="!form.valid || !isPasswordAndConfrimPasswordMaching"
+          [disabled]="
+            loginMode
+              ? !form.valid
+              : !form.valid || !isPasswordAndConfrimPasswordMaching
+          "
           class="btn btn-success"
           (click)="onAuthenticationClick(form)"
         >
