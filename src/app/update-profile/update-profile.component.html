@@ -17,7 +17,7 @@
           class="form-control"
           id="firstname"
           required
-          [ngModel]="firstName"
+          [ngModel]="user.firstName"
           name="firstname"
           #firstname="ngModel"
         />
@@ -28,7 +28,7 @@
         <input
           class="form-control"
           id="lastname"
-          [ngModel]="lastName"
+          [ngModel]="user.lastName"
           name="lastname"
           #lastname="ngModel"
         />
@@ -38,7 +38,7 @@
         <input
           class="form-control"
           id="profilePhotoURL"
-          [ngModel]="user.photoUrl ? user.photoUrl : ''"
+          [ngModel]="user.profilePhotoUrl ? user.profilePhotoUrl : ''"
           name="profilePhotoURL"
           #profilePhotoURL="ngModel"
         />

@@ -1,21 +1,21 @@
 export class User {
-  name: string;
-  photoUrl: string;
+  firstName: string;
+  lastName: string;
+  profilePhotoUrl: string;
   email: string;
-  id: string;
-  token: string;
+  _id: string;
 
   constructor(
     email: string,
-    id: string,
-    token: string,
-    name: string,
-    photoUrl: string
+    _id: string,
+    firstName: string,
+    lastName: string,
+    profilePhotoUrl: string
   ) {
     this.email = email;
-    this.id = id;
-    this.token = token;
-    this.name = name;
-    this.photoUrl = photoUrl;
+    this._id = _id;
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.profilePhotoUrl = profilePhotoUrl;
   }
 }

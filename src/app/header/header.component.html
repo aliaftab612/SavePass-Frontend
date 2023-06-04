@@ -21,8 +21,11 @@
     *ngIf="authenticated"
     style="display: flex; align-items: center; margin-left: auto"
   >
-    <div *ngIf="user.name && user.name != ''" style="margin-right: 8px">
-      {{ user.name }}
+    <div
+      *ngIf="user.firstName && user.firstName != ''"
+      style="margin-right: 8px"
+    >
+      {{ user.firstName + (user.lastName ? " " + user.lastName : "") }}
     </div>
     <nav class="navbar navbar-expand-sm">
       <div class="navbar-collapse">
@@ -31,8 +34,8 @@
             <a appDropDown style="cursor: pointer" class="nav-link">
               <img
                 [src]="
-                  user.photoUrl && user.photoUrl != ''
-                    ? user.photoUrl
+                  user.profilePhotoUrl && user.profilePhotoUrl != ''
+                    ? user.profilePhotoUrl
                     : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__340.png'
                 "
                 alt="..."

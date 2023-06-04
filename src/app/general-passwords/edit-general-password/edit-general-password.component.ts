@@ -1,18 +1,11 @@
-import {
-  Component,
-  EventEmitter,
-  OnDestroy,
-  OnInit,
-  Output,
-  ViewChild,
-} from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { GeneralPassword } from '../general-password.model';
 import { GeneralPasswordsDataStorageService } from '../general-passwords-data-storage.service';
-
-import { v4 as uuidv4 } from 'uuid';
+import { AuthService } from 'src/app/auth/auth.service';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { AlertService } from 'src/app/alert/alert.service';
+import { GeneralPasswordResponse } from 'index';
 
 @Component({
   selector: 'app-edit-general-password',
@@ -28,7 +21,8 @@ export class EditGeneralPasswordComponent implements OnInit, OnDestroy {
     private generalPasswordDataStorageService: GeneralPasswordsDataStorageService,
     private route: ActivatedRoute,
     private router: Router,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -38,10 +32,10 @@ export class EditGeneralPasswordComponent implements OnInit, OnDestroy {
 
       this.generalPasswordDataStorageService
         .getGeneralPassword(this.generalPasswordId)
-        .subscribe(
-          (generalPassword) => {
+        .subscribe({
+          next: (generalPassword: GeneralPasswordResponse) => {
             if (generalPassword != null) {
-              this.generalPassword = generalPassword;
+              this.generalPassword = generalPassword.data.generalPassword;
             } else {
               this.router.navigate(['/not-found'], {
                 queryParams: {
@@ -50,10 +44,14 @@ export class EditGeneralPasswordComponent implements OnInit, OnDestroy {
               });
             }
           },
-          (error) => {
-            this.alertService.failureAlertEvent.next(error.message);
-          }
-        );
+          error: (error) => {
+            if (error.status == 401) {
+              this.authService.logout();
+              return;
+            }
+            this.alertService.failureAlertEvent.next(error.error.message);
+          },
+        });
     }
   }
 
@@ -63,40 +61,49 @@ export class EditGeneralPasswordComponent implements OnInit, OnDestroy {
         this.generalPasswordDataStorageService
           .addGeneralPassword(
             new GeneralPassword(
-              uuidv4(),
+              null,
               form.value.website,
               form.value.username,
               form.value.password
             )
           )
-          .subscribe(
-            () => {
+          .subscribe({
+            complete: () => {
               this.router.navigate(['/general-passwords']);
               this.alertService.successAlertEvent.next('Created Successfully!');
             },
-            (error) => {
-              this.alertService.failureAlertEvent.next(error.message);
-            }
-          );
+            error: (error) => {
+              if (error.status == 401) {
+                this.authService.logout();
+                return;
+              }
+              this.alertService.failureAlertEvent.next(error.error.message);
+            },
+          });
       } else {
         this.generalPasswordDataStorageService
-          .addGeneralPassword(
+          .updateGeneralPassword(
+            this.generalPasswordId,
             new GeneralPassword(
-              this.generalPasswordId,
+              null,
               form.value.website,
               form.value.username,
               form.value.password
             )
           )
-          .subscribe(
-            (data) => {
+          .subscribe({
+            complete: () => {
               this.router.navigate(['/general-passwords']);
               this.alertService.successAlertEvent.next('Updated Successfully!');
             },
-            (error) => {
-              this.alertService.failureAlertEvent.next(error.message);
-            }
-          );
+            error: (error) => {
+              if (error.status == 401) {
+                this.authService.logout();
+                return;
+              }
+              this.alertService.failureAlertEvent.next(error.error.message);
+            },
+          });
       }
     }
   }

@@ -26,9 +26,13 @@ export class AuthComponent {
   onAuthenticationClick(form: NgForm) {
     if (form.valid) {
       if (this.loginMode) {
-        this.authService.login(form.value.username, form.value.password);
+        this.authService.authenticate(form.value.username, form.value.password);
       } else {
-        this.authService.signUp(form.value.username, form.value.password);
+        this.authService.authenticate(
+          form.value.username,
+          form.value.password,
+          true
+        );
       }
     }
   }

@@ -14,8 +14,6 @@ export class UpdateProfileComponent implements OnInit, OnDestroy {
   isSignUp: boolean = false;
   user: User;
   authEventSubscription: Subscription;
-  firstName: string = '';
-  lastName: string = '';
 
   constructor(
     private router: Router,
@@ -32,9 +30,7 @@ export class UpdateProfileComponent implements OnInit, OnDestroy {
     this.authEventSubscription =
       this.authService.isAuthenticatedEvent.subscribe((user) => {
         this.user = user;
-        this.updateFirstNameAndLastName();
       });
-    this.updateFirstNameAndLastName();
   }
 
   updateProfile(form: NgForm) {
@@ -49,16 +45,6 @@ export class UpdateProfileComponent implements OnInit, OnDestroy {
 
   cancel() {
     this.router.navigate(['general-passwords']);
-  }
-
-  updateFirstNameAndLastName() {
-    if (this.user.name) {
-      const name = this.user.name.split(' ');
-      this.firstName = name[0];
-      if (name[1]) {
-        this.lastName = name[1];
-      }
-    }
   }
 
   ngOnDestroy(): void {

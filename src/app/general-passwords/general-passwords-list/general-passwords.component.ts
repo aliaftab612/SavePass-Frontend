@@ -1,10 +1,4 @@
-import {
-  Component,
-  EventEmitter,
-  OnDestroy,
-  OnInit,
-  Output,
-} from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertService } from 'src/app/alert/alert.service';
 import { GeneralPassword } from '../general-password.model';
@@ -16,6 +10,8 @@ import {
   faCopy,
 } from '@fortawesome/free-solid-svg-icons';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import { AuthService } from 'src/app/auth/auth.service';
+import { GeneralPasswordsResponse } from 'index';
 
 @Component({
   selector: 'app-general-passwords',
@@ -31,18 +27,24 @@ export class GeneralPasswordsComponent implements OnInit, OnDestroy {
   constructor(
     private generalPasswordDataStorageService: GeneralPasswordsDataStorageService,
     private router: Router,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
-    this.generalPasswordDataStorageService.getGeneralPasswords().subscribe(
-      (data) => {
-        if (data != null) this.generalPasswords = Object.values(data);
+    this.generalPasswordDataStorageService.getGeneralPasswords().subscribe({
+      next: (data: GeneralPasswordsResponse) => {
+        if (data.data.generalPasswords.length != null)
+          this.generalPasswords = Object.values(data.data.generalPasswords);
       },
-      (error) => {
-        this.alertService.failureAlertEvent.next(error.message);
-      }
-    );
+      error: (error) => {
+        if (error.status == 401) {
+          this.authService.logout();
+          return;
+        }
+        this.alertService.failureAlertEvent.next(error.error.message);
+      },
+    });
   }
 
   copyPassword(password: string) {
@@ -67,17 +69,21 @@ export class GeneralPasswordsComponent implements OnInit, OnDestroy {
   }
 
   onDelete(id: string) {
-    this.generalPasswordDataStorageService.deleteGeneralPassword(id).subscribe(
-      () => {
+    this.generalPasswordDataStorageService.deleteGeneralPassword(id).subscribe({
+      complete: () => {
         this.generalPasswords = this.generalPasswords.filter(
-          (x) => x.id !== id
+          (x) => x._id !== id
         );
         this.alertService.successAlertEvent.next('Deleted Successfully!');
       },
-      (error) => {
-        this.alertService.failureAlertEvent.next(error.message);
-      }
-    );
+      error: (error) => {
+        if (error.status == 401) {
+          this.authService.logout();
+          return;
+        }
+        this.alertService.failureAlertEvent.next(error.error.message);
+      },
+    });
   }
 
   addNewGeneralPassword() {
