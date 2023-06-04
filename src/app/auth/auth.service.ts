@@ -5,6 +5,7 @@ import { CookieService } from 'ngx-cookie-service';
 import { Observable, Subject } from 'rxjs';
 import { AlertService } from '../alert/alert.service';
 import { User } from './user.model';
+import { environment } from 'src/environments/environment';
 import { LoginSignupResponse, UserDataResponse } from 'index';
 
 @Injectable({
@@ -38,7 +39,7 @@ export class AuthService {
   authenticate(email: string, password: string, isSignUp = false) {
     this.http
       .post<LoginSignupResponse>(
-        `http://localhost:3000/api/v1/${isSignUp ? 'signup' : 'login'}`,
+        `${environment.serverBaseUrl}/api/v1/${isSignUp ? 'signup' : 'login'}`,
         {
           email,
           password,
@@ -57,7 +58,7 @@ export class AuthService {
 
   getUserData(): Observable<UserDataResponse> {
     return this.http.get<UserDataResponse>(
-      `http://localhost:3000/api/v1/user`,
+      `${environment.serverBaseUrl}/api/v1/user`,
       {
         withCredentials: true,
       }
@@ -67,7 +68,7 @@ export class AuthService {
   updateUserData(firstName: string, lastName: string, profilePhotoUrl: string) {
     this.http
       .patch<UserDataResponse>(
-        `http://localhost:3000/api/v1/user`,
+        `${environment.serverBaseUrl}/api/v1/user`,
         { firstName, lastName, profilePhotoUrl },
         { withCredentials: true }
       )
@@ -110,7 +111,7 @@ export class AuthService {
 
   logout() {
     this.http
-      .get<LoginSignupResponse>('http://localhost:3000/api/v1/logout', {
+      .get<LoginSignupResponse>(`${environment.serverBaseUrl}/api/v1/logout`, {
         withCredentials: true,
       })
       .subscribe({

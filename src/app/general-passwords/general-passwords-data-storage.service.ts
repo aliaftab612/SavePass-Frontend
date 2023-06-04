@@ -5,6 +5,7 @@ import { AuthService } from '../auth/auth.service';
 import { User } from '../auth/user.model';
 import { GeneralPassword } from './general-password.model';
 import { GeneralPasswordResponse, GeneralPasswordsResponse } from 'index';
+import { environment } from 'src/environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class GeneralPasswordsDataStorageService {
@@ -22,7 +23,7 @@ export class GeneralPasswordsDataStorageService {
 
   getGeneralPasswords(): Observable<GeneralPasswordsResponse> {
     const generalPasswordObservable = this.http.get<GeneralPasswordsResponse>(
-      `http://localhost:3000/api/v1/general-passwords`,
+      `${environment.serverBaseUrl}/api/v1/general-passwords`,
       {
         withCredentials: true,
       }
@@ -34,7 +35,7 @@ export class GeneralPasswordsDataStorageService {
   deleteGeneralPassword(id: string): Observable<GeneralPasswordResponse> {
     const generalPasswordDeleteObservable =
       this.http.delete<GeneralPasswordResponse>(
-        `http://localhost:3000/api/v1/general-passwords/${id}`,
+        `${environment.serverBaseUrl}/api/v1/general-passwords/${id}`,
         { withCredentials: true }
       );
 
@@ -46,7 +47,7 @@ export class GeneralPasswordsDataStorageService {
   ): Observable<GeneralPasswordResponse> {
     const generalPasswordAddObservable =
       this.http.post<GeneralPasswordResponse>(
-        `http://localhost:3000/api/v1/general-passwords`,
+        `${environment.serverBaseUrl}/api/v1/general-passwords`,
         generalPassword,
         { withCredentials: true }
       );
@@ -60,7 +61,7 @@ export class GeneralPasswordsDataStorageService {
   ): Observable<GeneralPasswordResponse> {
     const generalPasswordUpdateObservable =
       this.http.patch<GeneralPasswordResponse>(
-        `http://localhost:3000/api/v1/general-passwords/${id}`,
+        `${environment.serverBaseUrl}/api/v1/general-passwords/${id}`,
         generalPassword,
         { withCredentials: true }
       );
@@ -70,7 +71,7 @@ export class GeneralPasswordsDataStorageService {
 
   getGeneralPassword(id: string): Observable<GeneralPasswordResponse> {
     const generalPasswordObservable = this.http.get<GeneralPasswordResponse>(
-      `http://localhost:3000/api/v1/general-passwords/${id}`,
+      `${environment.serverBaseUrl}/api/v1/general-passwords/${id}`,
       {
         withCredentials: true,
       }
