@@ -21,9 +21,12 @@ export class GeneralPasswordsDataStorageService {
     });
   }
 
-  getGeneralPasswords(): Observable<GeneralPasswordsResponse> {
+  getGeneralPasswords(
+    page: number,
+    search: string
+  ): Observable<GeneralPasswordsResponse> {
     const generalPasswordObservable = this.http.get<GeneralPasswordsResponse>(
-      `${environment.serverBaseUrl}/api/v1/general-passwords`,
+      `${environment.serverBaseUrl}/api/v1/general-passwords?page=${page}&filter=${search}`,
       {
         withCredentials: true,
       }

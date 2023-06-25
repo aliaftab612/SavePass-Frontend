@@ -12,6 +12,7 @@ import { User } from '../auth/user.model';
 export class HeaderComponent implements OnInit, OnDestroy {
   authenticated = false;
   isAuthenticatedEventSubscription: Subscription;
+  isMobileViewHamburgerClicked = false;
   user: User;
 
   constructor(private authService: AuthService, private router: Router) {}
@@ -28,10 +29,20 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   updateProfile() {
     this.router.navigate(['update-profile']);
+    this.mobileViewHamburgerClose();
   }
 
   logout() {
     this.authService.logout();
+    this.mobileViewHamburgerClose();
+  }
+
+  mobileViewHamburgerClicked() {
+    this.isMobileViewHamburgerClicked = true;
+  }
+
+  mobileViewHamburgerClose() {
+    this.isMobileViewHamburgerClicked = false;
   }
 
   ngOnDestroy(): void {

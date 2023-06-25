@@ -1,70 +1,169 @@
-<div
-  style="
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    background-color: rgba(248, 249, 250, 1);
-    padding: 20px;
-    height: 107px;
-  "
->
-  <a style="cursor: pointer; font-weight: bold; font-size: larger">SavePass</a>
-  <a
-    *ngIf="authenticated"
-    class="nav-link"
-    routerLink="general-passwords"
-    routerLinkActive="active"
-    style="cursor: pointer"
-    >General-Passwords</a
-  >
+<div class="relative w-full bg-white">
   <div
-    *ngIf="authenticated"
-    style="display: flex; align-items: center; margin-left: auto"
+    class="mx-auto flex max-w-8xl items-center justify-between px-4 py-2 sm:px-6 lg:px-8"
   >
-    <div
-      *ngIf="user.firstName && user.firstName != ''"
-      style="margin-right: 8px"
-    >
-      {{ user.firstName + (user.lastName ? " " + user.lastName : "") }}
+    <span class="font-bold">SavePass</span>
+    <div class="hidden grow items-start lg:flex">
+      <ul class="ml-12 inline-flex space-x-8">
+        <li>
+          <a
+            *ngIf="authenticated"
+            routerLink="general-passwords"
+            routerLinkActive="active"
+            class="text-sm font-semibold text-gray-800 hover:text-gray-900"
+          >
+            General-Passwords
+          </a>
+        </li>
+      </ul>
     </div>
-    <nav class="navbar navbar-expand-sm">
-      <div class="navbar-collapse">
-        <ul class="navbar-nav">
-          <li class="nav-item dropdown">
-            <a appDropDown style="cursor: pointer" class="nav-link">
+    <div *ngIf="authenticated" class="flex items-center">
+      <div
+        *ngIf="user.firstName && user.firstName != ''"
+        style="margin-right: 8px"
+        class="hidden lg:block"
+      >
+        {{ user.firstName + (user.lastName ? " " + user.lastName : "") }}
+      </div>
+      <div class="ml-2 mt-2 hidden lg:block">
+        <a appDropDown style="cursor: pointer" class="relative inline-block">
+          <img
+            class="h-10 w-10 rounded-full"
+            [src]="
+              user.profilePhotoUrl && user.profilePhotoUrl != ''
+                ? user.profilePhotoUrl
+                : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__340.png'
+            "
+            alt="..."
+          />
+        </a>
+        <div
+          class="dropdown-menu"
+          style="right: 10px; left: auto; position: absolute"
+        >
+          <a
+            class="dropdown-item"
+            style="cursor: pointer"
+            (click)="updateProfile()"
+            >Update Profile</a
+          >
+          <a class="dropdown-item" style="cursor: pointer" (click)="logout()"
+            >Logout</a
+          >
+        </div>
+      </div>
+      <div class="ml-2 lg:hidden">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="h-6 w-6 cursor-pointer"
+          (click)="mobileViewHamburgerClicked()"
+        >
+          <line x1="4" y1="12" x2="20" y2="12"></line>
+          <line x1="4" y1="6" x2="20" y2="6"></line>
+          <line x1="4" y1="18" x2="20" y2="18"></line>
+        </svg>
+      </div>
+    </div>
+    <div
+      *ngIf="authenticated && isMobileViewHamburgerClicked"
+      class="absolute inset-x-0 top-0 z-50 origin-top-right transform p-2 transition lg:hidden"
+    >
+      <div
+        class="divide-y-2 divide-gray-50 rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5"
+      >
+        <div class="px-5 pb-6 pt-5">
+          <div class="flex items-center justify-between">
+            <span class="font-bold">SavePass</span>
+
+            <div class="-mr-2">
+              <button
+                type="button"
+                class="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+              >
+                <span class="sr-only">Close menu</span
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="h-6 w-6"
+                  aria-hidden="true"
+                  (click)="mobileViewHamburgerClose()"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="mt-6">
+            <nav class="grid gap-y-4">
+              <a
+                *ngIf="authenticated"
+                routerLink="general-passwords"
+                routerLinkActive="active"
+                (click)="mobileViewHamburgerClose()"
+                class="-m-3 flex items-center rounded-md p-3 text-sm font-semibold hover:bg-gray-50"
+                ><span class="ml-3 text-base font-medium text-gray-900"
+                  >General-Passwords</span
+                ></a
+              >
+            </nav>
+          </div>
+          <div
+            class="ml-3 mt-4 flex items-center justify-between flex-wrap space-x-2"
+          >
+            <div class="flex flex-row space-x-2 items-center">
               <img
+                class="inline-block h-10 w-10 rounded-full"
                 [src]="
                   user.profilePhotoUrl && user.profilePhotoUrl != ''
                     ? user.profilePhotoUrl
                     : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__340.png'
                 "
                 alt="..."
-                class="border border-1 border-dark rounded-circle"
-                width="35"
-                style="cursor: pointer"
-                height="35"
-              />
-            </a>
-            <div
-              class="dropdown-menu"
-              style="right: 0; left: auto; position: absolute"
-            >
-              <a
-                class="dropdown-item"
-                style="cursor: pointer"
-                (click)="updateProfile()"
-                >Update Profile</a
-              >
-              <a
-                class="dropdown-item"
-                style="cursor: pointer"
-                (click)="logout()"
-                >Logout</a
+              /><span class="flex flex-col"
+                ><span
+                  *ngIf="user.firstName && user.firstName != ''"
+                  class="text-sm font-medium text-gray-900"
+                  >{{
+                    user.firstName + (user.lastName ? " " + user.lastName : "")
+                  }}</span
+                ></span
               >
             </div>
-          </li>
-        </ul>
+          </div>
+          <div class="ml-3 mt-2 flex flex-row space-x-2">
+            <button
+              type="button"
+              (click)="updateProfile()"
+              class="rounded-md border border-black px-3 py-2 text-sm font-semibold text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+            >
+              Update Profile
+            </button>
+            <button
+              type="button"
+              (click)="logout()"
+              class="rounded-md bg-black px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
       </div>
-    </nav>
+    </div>
   </div>
 </div>

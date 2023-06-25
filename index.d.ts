@@ -15,6 +15,7 @@ interface LoginSignupResponse {
 interface GeneralPasswordsResponse {
   status: string;
   page: number;
+  totalPages: number;
   results: number;
   data: { generalPasswords: GeneralPassword[] };
 }

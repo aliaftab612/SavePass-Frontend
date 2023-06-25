@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import { AlertService } from 'src/app/alert/alert.service';
 import { GeneralPassword } from '../general-password.model';
 import { GeneralPasswordsDataStorageService } from '../general-passwords-data-storage.service';
@@ -20,31 +20,107 @@ import { GeneralPasswordsResponse } from 'index';
 })
 export class GeneralPasswordsComponent implements OnInit, OnDestroy {
   generalPasswords: GeneralPassword[] = [];
-
+  currentPage: number = 1;
   passwordHiddenImg: IconDefinition = faEye;
   passwordCopyImg: IconDefinition = faCopy;
+  totalPages = 0;
+  startPage = 1;
+  searchText: string = '';
+  searchTimer: any;
 
   constructor(
     private generalPasswordDataStorageService: GeneralPasswordsDataStorageService,
     private router: Router,
     private alertService: AlertService,
-    private authService: AuthService
+    private authService: AuthService,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
-    this.generalPasswordDataStorageService.getGeneralPasswords().subscribe({
-      next: (data: GeneralPasswordsResponse) => {
-        if (data.data.generalPasswords.length != null)
-          this.generalPasswords = Object.values(data.data.generalPasswords);
-      },
-      error: (error) => {
-        if (error.status == 401) {
-          this.authService.logout();
-          return;
+    this.populateGeneralPasswords();
+
+    this.route.queryParams.subscribe({
+      next: (queryParams: Params) => {
+        const pageParam = queryParams['page'];
+
+        if (pageParam != undefined) {
+          if (!isNaN(pageParam) && pageParam > 0) {
+            this.currentPage = Number(pageParam);
+
+            this.populateGeneralPasswords();
+          } else {
+            this.router.navigate(['/not-found']);
+          }
         }
-        this.alertService.failureAlertEvent.next(error.error.message);
       },
     });
+  }
+
+  searchTextChanged(searchGeneralPasswordsElememt: HTMLInputElement) {
+    if (this.searchTimer && this.searchTimer != undefined) {
+      clearTimeout(this.searchTimer);
+    }
+
+    this.searchTimer = setTimeout(() => {
+      this.searchText = searchGeneralPasswordsElememt.value;
+      if (this.currentPage !== 1) {
+        this.router.navigate(['/general-passwords'], {
+          queryParams: { page: 1 },
+        });
+      } else {
+        this.populateGeneralPasswords();
+      }
+    }, 1000);
+  }
+
+  populateGeneralPasswords() {
+    this.generalPasswordDataStorageService
+      .getGeneralPasswords(this.currentPage, this.searchText)
+      .subscribe({
+        next: (data: GeneralPasswordsResponse) => {
+          this.totalPages = data.totalPages;
+
+          if (data.data.generalPasswords.length != null)
+            this.generalPasswords = Object.values(data.data.generalPasswords);
+
+          this.calculatePaginationStartIndex();
+        },
+        error: (error) => {
+          if (error.status == 401) {
+            this.authService.logout();
+            return;
+          }
+          this.alertService.failureAlertEvent.next(error.error.message);
+        },
+      });
+  }
+
+  calculatePaginationStartIndex() {
+    if (
+      ((this.totalPages === 0 || this.totalPages === 1) &&
+        this.currentPage > 1) ||
+      (this.currentPage !== 1 && this.currentPage > this.totalPages)
+    ) {
+      this.router.navigate(['/not-found']);
+      return;
+    }
+
+    if (this.currentPage % 4 === 0 && this.currentPage < this.totalPages) {
+      this.startPage = this.currentPage - 1;
+    } else if (
+      this.currentPage % 4 === 0 &&
+      this.currentPage === this.totalPages
+    ) {
+      this.startPage = this.currentPage - 3;
+    } else if (this.currentPage % 4 === 3) {
+      this.startPage = this.currentPage - 2;
+    } else if (this.currentPage % 4 === 2) {
+      this.startPage = this.currentPage - 1;
+    } else if (this.currentPage % 4 === 1 && this.currentPage === 1) {
+      this.startPage = this.currentPage;
+    } else if (this.currentPage % 4 === 1 && this.currentPage !== 1) {
+      this.startPage = this.currentPage - 2;
+    }
   }
 
   copyPassword(password: string) {
@@ -71,10 +147,15 @@ export class GeneralPasswordsComponent implements OnInit, OnDestroy {
   onDelete(id: string) {
     this.generalPasswordDataStorageService.deleteGeneralPassword(id).subscribe({
       complete: () => {
-        this.generalPasswords = this.generalPasswords.filter(
-          (x) => x._id !== id
-        );
         this.alertService.successAlertEvent.next('Deleted Successfully!');
+
+        if (this.generalPasswords.length === 1 && this.currentPage !== 1) {
+          this.router.navigate(['/general-passwords'], {
+            queryParams: { page: this.currentPage - 1 },
+          });
+          return;
+        }
+        this.populateGeneralPasswords();
       },
       error: (error) => {
         if (error.status == 401) {

@@ -1,68 +1,88 @@
-<div style="display: flex; justify-content: center">
+<section>
   <div
-    style="
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      margin: 50px;
-      flex: 0 500px;
-    "
+    class="flex items-center justify-center px-4 py-10 sm:px-6 sm:py-16 lg:px-8 lg:py-24"
   >
-    <h2 style="text-align: center">Update Profile</h2>
-    <hr />
-    <form #form="ngForm">
-      <div class="form-group">
-        <label for="firstname">First Name</label>
-        <input
-          class="form-control"
-          id="firstname"
-          required
-          [ngModel]="user.firstName"
-          name="firstname"
-          #firstname="ngModel"
-        />
-        <div *ngIf="!firstname.valid && firstname.touched" style="color: red">
-          * This field is required.
+    <div class="xl:mx-auto xl:w-full xl:max-w-sm 2xl:max-w-md">
+      <h2 class="text-center text-2xl font-bold leading-tight text-black">
+        Update Profile
+      </h2>
+      <form #form="ngForm" class="mt-8">
+        <div class="space-y-5">
+          <div>
+            <label for="firstName" class="text-base font-medium text-gray-900">
+              First Name
+            </label>
+            <div class="mt-2">
+              <input
+                class="flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
+                id="firstname"
+                required
+                [ngModel]="user.firstName"
+                name="firstname"
+                #firstname="ngModel"
+              />
+              <div
+                *ngIf="!firstname.valid && firstname.touched"
+                style="color: red"
+              >
+                * This field is required.
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between">
+              <label for="lastName" class="text-base font-medium text-gray-900">
+                Last Name
+              </label>
+            </div>
+            <div class="mt-2">
+              <input
+                class="flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
+                id="lastname"
+                [ngModel]="user.lastName"
+                name="lastname"
+                #lastname="ngModel"
+              />
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between">
+              <label
+                for="profilePhotoURL"
+                class="text-base font-medium text-gray-900"
+              >
+                Profile Photo URL
+              </label>
+            </div>
+            <div class="mt-2">
+              <input
+                class="flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
+                id="profilePhotoURL"
+                [ngModel]="user.profilePhotoUrl ? user.profilePhotoUrl : ''"
+                name="profilePhotoURL"
+                #profilePhotoURL="ngModel"
+              />
+            </div>
+          </div>
+          <div class="flex flex-row justify-center gap-3">
+            <button
+              type="button"
+              [disabled]="!form.valid"
+              (click)="updateProfile(form)"
+              class="cursor-not-allowed rounded-md bg-black px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+            >
+              Save
+            </button>
+            <button
+              type="button"
+              (click)="cancel()"
+              class="rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-600/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+            >
+              {{ isSignUp ? "Skip" : "Cancel" }}
+            </button>
+          </div>
         </div>
-        <label for="lastname" style="margin-top: 30px">Last Name</label>
-        <input
-          class="form-control"
-          id="lastname"
-          [ngModel]="user.lastName"
-          name="lastname"
-          #lastname="ngModel"
-        />
-        <label for="profilePhotoURL" style="margin-top: 30px"
-          >Profile Photo URL</label
-        >
-        <input
-          class="form-control"
-          id="profilePhotoURL"
-          [ngModel]="user.profilePhotoUrl ? user.profilePhotoUrl : ''"
-          name="profilePhotoURL"
-          #profilePhotoURL="ngModel"
-        />
-      </div>
-      <br />
-      <div
-        style="
-          display: flex;
-          gap: 1rem;
-          justify-content: center;
-          margin-top: 5px;
-        "
-      >
-        <button
-          [disabled]="!form.valid"
-          class="btn btn-success"
-          (click)="updateProfile(form)"
-        >
-          Update
-        </button>
-        <button class="btn btn-primary" (click)="cancel()">
-          {{ isSignUp ? "Skip" : "Cancel" }}
-        </button>
-      </div>
-    </form>
+      </form>
+    </div>
   </div>
-</div>
+</section>
