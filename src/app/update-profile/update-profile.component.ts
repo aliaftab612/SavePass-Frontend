@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 import { User } from '../auth/user.model';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-update-profile',
@@ -18,7 +19,8 @@ export class UpdateProfileComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private authService: AuthService
+    private authService: AuthService,
+    private _location: Location
   ) {}
 
   ngOnInit(): void {
@@ -38,13 +40,18 @@ export class UpdateProfileComponent implements OnInit, OnDestroy {
       this.authService.updateUserData(
         form.value.firstname,
         form.value.lastname,
-        form.value.profilePhotoURL
+        form.value.profilePhotoURL,
+        this.isSignUp
       );
     }
   }
 
   cancel() {
-    this.router.navigate(['general-passwords']);
+    if (this.isSignUp) {
+      this.router.navigate(['general-passwords']);
+    } else {
+      this._location.back();
+    }
   }
 
   ngOnDestroy(): void {

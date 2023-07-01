@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
+import { Location } from '@angular/common';
 import { GeneralPassword } from '../general-password.model';
 import { GeneralPasswordsDataStorageService } from '../general-passwords-data-storage.service';
 import { AuthService } from 'src/app/auth/auth.service';
@@ -22,7 +23,8 @@ export class EditGeneralPasswordComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private alertService: AlertService,
-    private authService: AuthService
+    private authService: AuthService,
+    private _location: Location
   ) {}
 
   ngOnInit(): void {
@@ -93,7 +95,7 @@ export class EditGeneralPasswordComponent implements OnInit, OnDestroy {
           )
           .subscribe({
             complete: () => {
-              this.router.navigate(['/general-passwords']);
+              this._location.back();
               this.alertService.successAlertEvent.next('Updated Successfully!');
             },
             error: (error) => {
@@ -109,7 +111,7 @@ export class EditGeneralPasswordComponent implements OnInit, OnDestroy {
   }
 
   onCancel() {
-    this.router.navigate(['/general-passwords']);
+    this._location.back();
   }
 
   ngOnDestroy(): void {

@@ -37,23 +37,31 @@ export class GeneralPasswordsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.populateGeneralPasswords();
-
     this.route.queryParams.subscribe({
       next: (queryParams: Params) => {
         const pageParam = queryParams['page'];
+        const searchParam = queryParams['search'];
+
+        if (searchParam != undefined) {
+          this.searchText = searchParam;
+        } else {
+          this.searchText = '';
+        }
 
         if (pageParam != undefined) {
           if (!isNaN(pageParam) && pageParam > 0) {
             this.currentPage = Number(pageParam);
-
-            this.populateGeneralPasswords();
           } else {
             this.router.navigate(['/not-found']);
           }
+        } else {
+          this.currentPage = 1;
         }
+        this.populateGeneralPasswords();
       },
     });
+
+    this.populateGeneralPasswords();
   }
 
   searchTextChanged(searchGeneralPasswordsElememt: HTMLInputElement) {
@@ -63,13 +71,15 @@ export class GeneralPasswordsComponent implements OnInit, OnDestroy {
 
     this.searchTimer = setTimeout(() => {
       this.searchText = searchGeneralPasswordsElememt.value;
-      if (this.currentPage !== 1) {
-        this.router.navigate(['/general-passwords'], {
-          queryParams: { page: 1 },
-        });
-      } else {
-        this.populateGeneralPasswords();
-      }
+
+      const queryParams =
+        this.searchText !== ''
+          ? { page: 1, search: this.searchText }
+          : { page: 1 };
+
+      this.router.navigate(['/general-passwords'], {
+        queryParams,
+      });
     }, 1000);
   }
 
@@ -151,7 +161,10 @@ export class GeneralPasswordsComponent implements OnInit, OnDestroy {
 
         if (this.generalPasswords.length === 1 && this.currentPage !== 1) {
           this.router.navigate(['/general-passwords'], {
-            queryParams: { page: this.currentPage - 1 },
+            queryParams: {
+              page: this.currentPage - 1,
+              search: this.searchText,
+            },
           });
           return;
         }
@@ -173,6 +186,15 @@ export class GeneralPasswordsComponent implements OnInit, OnDestroy {
 
   onEdit(id: string) {
     this.router.navigate(['/general-passwords', id, 'edit']);
+  }
+
+  navigateToPage(page: number) {
+    const queryParams =
+      this.searchText !== '' ? { page, search: this.searchText } : { page };
+
+    this.router.navigate(['/general-passwords'], {
+      queryParams,
+    });
   }
 
   ngOnDestroy(): void {

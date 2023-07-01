@@ -7,6 +7,7 @@ import { AlertService } from '../alert/alert.service';
 import { User } from './user.model';
 import { environment } from 'src/environments/environment';
 import { LoginSignupResponse, UserDataResponse } from 'index';
+import { Location } from '@angular/common';
 
 @Injectable({
   providedIn: 'root',
@@ -19,7 +20,8 @@ export class AuthService {
     private http: HttpClient,
     private alertService: AlertService,
     private router: Router,
-    private cookies: CookieService
+    private cookies: CookieService,
+    private _location: Location
   ) {}
 
   autoLogin = new Observable((subscriber) => {
@@ -65,7 +67,12 @@ export class AuthService {
     );
   }
 
-  updateUserData(firstName: string, lastName: string, profilePhotoUrl: string) {
+  updateUserData(
+    firstName: string,
+    lastName: string,
+    profilePhotoUrl: string,
+    isSignUp = false
+  ) {
     this.http
       .patch<UserDataResponse>(
         `${environment.serverBaseUrl}/api/v1/user`,
@@ -76,7 +83,11 @@ export class AuthService {
         next: (userData: UserDataResponse) => {
           this.user = userData.data.user;
           this.isAuthenticatedEvent.next(Object.create(this.user));
-          this.router.navigate(['general-passwords']);
+          if (isSignUp) {
+            this.router.navigate(['general-passwords']);
+          } else {
+            this._location.back();
+          }
           this.alertService.successAlertEvent.next(
             'Profile Updated Successfully!'
           );
