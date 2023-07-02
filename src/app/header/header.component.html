@@ -1,8 +1,8 @@
-<div class="relative w-full bg-white">
+<div class="relative w-full">
   <div
     class="mx-auto flex max-w-8xl items-center justify-between px-4 py-2 sm:px-6 lg:px-8"
   >
-    <span class="font-bold">SavePass</span>
+    <span class="font-bold dark:text-white">SavePass</span>
     <div class="hidden grow items-start lg:flex">
       <ul class="ml-12 inline-flex space-x-8">
         <li>
@@ -10,66 +10,190 @@
             *ngIf="authenticated"
             routerLink="general-passwords"
             routerLinkActive="active"
-            class="text-sm font-semibold text-gray-800 hover:text-gray-900"
+            class="text-sm font-semibold text-gray-800 dark:text-white"
           >
             General-Passwords
           </a>
         </li>
       </ul>
     </div>
-    <div *ngIf="authenticated" class="flex items-center">
+    <div class="flex items-center">
+      <button appDropDown type="button" (click)="setSelectedTheme()">
+        <span class="dark:hidden"
+          ><svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="w-6 h-6"
+          >
+            <path
+              d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+              class="fill-black/20 dark:fill-white/20 stroke-black dark:stroke-white"
+            ></path>
+            <path
+              d="M12 4v1M17.66 6.344l-.828.828M20.005 12.004h-1M17.66 17.664l-.828-.828M12 20.01V19M6.34 17.664l.835-.836M3.995 12.004h1.01M6 6l.835.836"
+              class="stroke-black dark:stroke-white"
+            ></path></svg
+        ></span>
+        <span class="hidden dark:inline"
+          ><svg viewBox="0 0 24 24" fill="none" class="w-6 h-6">
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M17.715 15.15A6.5 6.5 0 0 1 9 6.035C6.106 6.922 4 9.645 4 12.867c0 3.94 3.153 7.136 7.042 7.136 3.101 0 5.734-2.032 6.673-4.853Z"
+              class="fill-black/20 dark:fill-white/20"
+            ></path>
+            <path
+              d="m17.715 15.15.95.316a1 1 0 0 0-1.445-1.185l.495.869ZM9 6.035l.846.534a1 1 0 0 0-1.14-1.49L9 6.035Zm8.221 8.246a5.47 5.47 0 0 1-2.72.718v2a7.47 7.47 0 0 0 3.71-.98l-.99-1.738Zm-2.72.718A5.5 5.5 0 0 1 9 9.5H7a7.5 7.5 0 0 0 7.5 7.5v-2ZM9 9.5c0-1.079.31-2.082.845-2.93L8.153 5.5A7.47 7.47 0 0 0 7 9.5h2Zm-4 3.368C5 10.089 6.815 7.75 9.292 6.99L8.706 5.08C5.397 6.094 3 9.201 3 12.867h2Zm6.042 6.136C7.718 19.003 5 16.268 5 12.867H3c0 4.48 3.588 8.136 8.042 8.136v-2Zm5.725-4.17c-.81 2.433-3.074 4.17-5.725 4.17v2c3.552 0 6.553-2.327 7.622-5.537l-1.897-.632Z"
+              class="fill-black dark:fill-white"
+            ></path>
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M17 3a1 1 0 0 1 1 1 2 2 0 0 0 2 2 1 1 0 1 1 0 2 2 2 0 0 0-2 2 1 1 0 1 1-2 0 2 2 0 0 0-2-2 1 1 0 1 1 0-2 2 2 0 0 0 2-2 1 1 0 0 1 1-1Z"
+              class="fill-black dark:fill-white"
+            ></path></svg
+        ></span>
+      </button>
       <div
-        *ngIf="user.firstName && user.firstName != ''"
-        style="margin-right: 8px"
-        class="hidden lg:block"
+        class="dropdown-menu dark:bg-slate-900 dark:border-slate-600"
+        style="right: 30px; top: 60px; left: auto; position: absolute"
       >
-        {{ user.firstName + (user.lastName ? " " + user.lastName : "") }}
+        <a
+          [class]="
+            'dropdown-item flex items-center dark:text-white dark:hover:bg-slate-800 ' +
+            (selectedTheme === 'light' ? 'bg-sky-500' : '')
+          "
+          style="cursor: pointer"
+          onclick="switchTheme('light')"
+          ><svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="w-6 h-6 mr-2"
+          >
+            <path
+              d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+              class="fill-black/20 stroke-black dark:stroke-white dark:fill-white/20"
+            ></path>
+            <path
+              d="M12 4v1M17.66 6.344l-.828.828M20.005 12.004h-1M17.66 17.664l-.828-.828M12 20.01V19M6.34 17.664l.835-.836M3.995 12.004h1.01M6 6l.835.836"
+              class="stroke-black dark:stroke-white"
+            ></path></svg
+          >Light</a
+        >
+        <a
+          [class]="
+            'dropdown-item flex items-center dark:text-white dark:hover:bg-slate-800 ' +
+            (selectedTheme === 'dark' ? 'bg-sky-500' : '')
+          "
+          style="cursor: pointer"
+          onclick="switchTheme('dark')"
+          ><svg viewBox="0 0 24 24" fill="none" class="w-6 h-6 mr-2">
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M17.715 15.15A6.5 6.5 0 0 1 9 6.035C6.106 6.922 4 9.645 4 12.867c0 3.94 3.153 7.136 7.042 7.136 3.101 0 5.734-2.032 6.673-4.853Z"
+              class="fill-black/20 dark:fill-white/20"
+            ></path>
+            <path
+              d="m17.715 15.15.95.316a1 1 0 0 0-1.445-1.185l.495.869ZM9 6.035l.846.534a1 1 0 0 0-1.14-1.49L9 6.035Zm8.221 8.246a5.47 5.47 0 0 1-2.72.718v2a7.47 7.47 0 0 0 3.71-.98l-.99-1.738Zm-2.72.718A5.5 5.5 0 0 1 9 9.5H7a7.5 7.5 0 0 0 7.5 7.5v-2ZM9 9.5c0-1.079.31-2.082.845-2.93L8.153 5.5A7.47 7.47 0 0 0 7 9.5h2Zm-4 3.368C5 10.089 6.815 7.75 9.292 6.99L8.706 5.08C5.397 6.094 3 9.201 3 12.867h2Zm6.042 6.136C7.718 19.003 5 16.268 5 12.867H3c0 4.48 3.588 8.136 8.042 8.136v-2Zm5.725-4.17c-.81 2.433-3.074 4.17-5.725 4.17v2c3.552 0 6.553-2.327 7.622-5.537l-1.897-.632Z"
+              class="fill-black dark:fill-white"
+            ></path>
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M17 3a1 1 0 0 1 1 1 2 2 0 0 0 2 2 1 1 0 1 1 0 2 2 2 0 0 0-2 2 1 1 0 1 1-2 0 2 2 0 0 0-2-2 1 1 0 1 1 0-2 2 2 0 0 0 2-2 1 1 0 0 1 1-1Z"
+              class="fill-black dark:fill-white"
+            ></path></svg
+          >Dark</a
+        >
+        <a
+          [class]="
+            'dropdown-item flex items-center dark:text-white dark:hover:bg-slate-800 ' +
+            (selectedTheme === 'system' ? 'bg-sky-500' : '')
+          "
+          style="cursor: pointer"
+          onclick="switchTheme('system')"
+        >
+          <svg viewBox="0 0 24 24" fill="none" class="w-6 h-6 mr-2">
+            <path
+              d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6Z"
+              stroke-width="2"
+              stroke-linejoin="round"
+              class="stroke-black fill-black/20 dark:stroke-white dark:fill-white/20"
+            ></path>
+            <path
+              d="M14 15c0 3 2 5 2 5H8s2-2 2-5"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="stroke-black dark:stroke-white"
+            ></path></svg
+          >System</a
+        >
       </div>
-      <div class="ml-2 mt-2 hidden lg:block">
-        <a appDropDown style="cursor: pointer" class="relative inline-block">
-          <img
-            class="h-10 w-10 rounded-full"
-            [src]="
-              user.profilePhotoUrl && user.profilePhotoUrl != ''
-                ? user.profilePhotoUrl
-                : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__340.png'
-            "
-            alt="..."
-          />
-        </a>
+      <div *ngIf="authenticated" class="flex items-center">
         <div
-          class="dropdown-menu"
-          style="right: 10px; left: auto; position: absolute"
+          *ngIf="user.firstName && user.firstName != ''"
+          style="margin-right: 8px; margin-left: 8px"
+          class="hidden lg:block dark:text-white"
         >
-          <a
-            class="dropdown-item"
-            style="cursor: pointer"
-            (click)="updateProfile()"
-            >Update Profile</a
-          >
-          <a class="dropdown-item" style="cursor: pointer" (click)="logout()"
-            >Logout</a
-          >
+          {{ user.firstName + (user.lastName ? " " + user.lastName : "") }}
         </div>
-      </div>
-      <div class="ml-2 lg:hidden">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="h-6 w-6 cursor-pointer"
-          (click)="mobileViewHamburgerClicked()"
-        >
-          <line x1="4" y1="12" x2="20" y2="12"></line>
-          <line x1="4" y1="6" x2="20" y2="6"></line>
-          <line x1="4" y1="18" x2="20" y2="18"></line>
-        </svg>
+        <div class="ml-2 mt-2 hidden lg:block">
+          <a appDropDown style="cursor: pointer" class="relative inline-block">
+            <img
+              class="h-10 w-10 rounded-full"
+              [src]="
+                user.profilePhotoUrl && user.profilePhotoUrl != ''
+                  ? user.profilePhotoUrl
+                  : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__340.png'
+              "
+              alt="..."
+            />
+          </a>
+          <div
+            class="dropdown-menu dark:bg-slate-900 dark:border-slate-600"
+            style="right: 10px; left: auto; position: absolute"
+          >
+            <a
+              class="dropdown-item dark:text-white dark:hover:bg-slate-800"
+              style="cursor: pointer"
+              (click)="updateProfile()"
+              >Update Profile</a
+            >
+            <a
+              class="dropdown-item dark:text-white dark:hover:bg-slate-800"
+              style="cursor: pointer"
+              (click)="logout()"
+              >Logout</a
+            >
+          </div>
+        </div>
+        <div class="ml-2 lg:hidden dark:text-white">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="h-6 w-6 cursor-pointer"
+            (click)="mobileViewHamburgerClicked()"
+          >
+            <line x1="4" y1="12" x2="20" y2="12"></line>
+            <line x1="4" y1="6" x2="20" y2="6"></line>
+            <line x1="4" y1="18" x2="20" y2="18"></line>
+          </svg>
+        </div>
       </div>
     </div>
     <div
@@ -77,16 +201,16 @@
       class="absolute inset-x-0 top-0 z-50 origin-top-right transform p-2 transition lg:hidden"
     >
       <div
-        class="divide-y-2 divide-gray-50 rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5"
+        class="divide-y-2 bg-gray-50 dark:bg-slate-900 divide-gray-50 dark:ring-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5"
       >
         <div class="px-5 pb-6 pt-5">
           <div class="flex items-center justify-between">
-            <span class="font-bold">SavePass</span>
+            <span class="font-bold dark:text-white">SavePass</span>
 
             <div class="-mr-2">
               <button
                 type="button"
-                class="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+                class="inline-flex items-center justify-center rounded-md p-2 dark:text-gray-300 text-gray-400 hover:bg-gray-100 dark:hover:text-white hover:text-gray-500 dark:hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
               >
                 <span class="sr-only">Close menu</span
                 ><svg
@@ -116,8 +240,9 @@
                 routerLink="general-passwords"
                 routerLinkActive="active"
                 (click)="mobileViewHamburgerClose()"
-                class="-m-3 flex items-center rounded-md p-3 text-sm font-semibold hover:bg-gray-50"
-                ><span class="ml-3 text-base font-medium text-gray-900"
+                class="-m-3 flex items-center rounded-md p-3 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-slate-800"
+                ><span
+                  class="ml-3 text-base font-medium text-gray-900 dark:text-white"
                   >General-Passwords</span
                 ></a
               >
@@ -138,7 +263,7 @@
               /><span class="flex flex-col"
                 ><span
                   *ngIf="user.firstName && user.firstName != ''"
-                  class="text-sm font-medium text-gray-900"
+                  class="text-sm font-medium text-gray-900 dark:text-white"
                   >{{
                     user.firstName + (user.lastName ? " " + user.lastName : "")
                   }}</span
@@ -150,14 +275,14 @@
             <button
               type="button"
               (click)="updateProfile()"
-              class="rounded-md border border-black px-3 py-2 text-sm font-semibold text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+              class="rounded-md border border-black px-3 py-2 dark:text-white text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
             >
               Update Profile
             </button>
             <button
               type="button"
               (click)="logout()"
-              class="rounded-md bg-black px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+              class="rounded-md bg-slate-900 dark:bg-sky-500 dark:hover:bg-sky-500/80 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
             >
               Logout
             </button>

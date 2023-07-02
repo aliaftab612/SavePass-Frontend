@@ -1,12 +1,14 @@
 <div class="py-10">
   <div class="text-center">
-    <p class="text-base font-semibold text-black">
+    <p class="text-base font-semibold dark:text-white">
       {{ message !== "" ? "500" : "404" }}
     </p>
-    <h1 class="mt-2 text-3xl font-bold tracking-tight text-black sm:text-5xl">
+    <h1
+      class="mt-2 text-3xl font-bold tracking-tight sm:text-5xl dark:text-white"
+    >
       {{ message !== "" ? "Internal Server Error" : "Page Not Found" }}
     </h1>
-    <p class="mt-4 text-base leading-7 text-gray-600">
+    <p class="mt-4 text-base leading-7 text-gray-600 dark:text-gray-300">
       {{
         message !== ""
           ? message
@@ -16,7 +18,7 @@
     <div class="mt-4 flex items-center justify-center gap-x-3">
       <a
         routerLink="/general-passwords"
-        class="rounded-md bg-black px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+        class="rounded-md px-3 dark:hover:bg-sky-500/80 bg-slate-900 dark:bg-sky-500 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
       >
         Navigate to Home
       </a>

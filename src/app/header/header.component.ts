@@ -14,6 +14,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   isAuthenticatedEventSubscription: Subscription;
   isMobileViewHamburgerClicked = false;
   user: User;
+  selectedTheme: string = 'system';
 
   constructor(private authService: AuthService, private router: Router) {}
 
@@ -25,6 +26,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
       this.authenticated = userData !== null ? true : false;
       this.user = userData;
     });
+  }
+
+  setSelectedTheme() {
+    const theme = localStorage.getItem('theme');
+    this.selectedTheme = theme ? theme : 'system';
   }
 
   updateProfile() {

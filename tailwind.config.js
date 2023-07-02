@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: "class",
   content: [
     "src/app/auth/auth.component.html",
     "src/app/header/header.component.html",
@@ -7,6 +8,7 @@ module.exports = {
     "src/app/general-passwords/edit-general-password/edit-general-password.component.html",
     "src/app/update-profile/update-profile.component.html",
     "src/app/not-found/not-found.component.html",
+    "src/index.html",
   ],
   theme: {
     extend: {},
