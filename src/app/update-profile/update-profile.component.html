@@ -17,7 +17,7 @@
             </label>
             <div class="mt-2">
               <input
-                class="flex h-10 w-full dark:text-white rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
+                class="flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 dark:text-white"
                 id="firstname"
                 required
                 [ngModel]="user.firstName"
@@ -43,7 +43,7 @@
             </div>
             <div class="mt-2">
               <input
-                class="flex h-10 dark:text-white w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
+                class="flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 dark:text-white"
                 id="lastname"
                 [ngModel]="user.lastName"
                 name="lastname"
@@ -62,7 +62,7 @@
             </div>
             <div class="mt-2">
               <input
-                class="flex h-10 w-full dark:text-white rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
+                class="flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 dark:text-white"
                 id="profilePhotoURL"
                 [ngModel]="user.profilePhotoUrl ? user.profilePhotoUrl : ''"
                 name="profilePhotoURL"
@@ -75,7 +75,7 @@
               type="button"
               [disabled]="!form.valid"
               (click)="updateProfile(form)"
-              class="cursor-not-allowed hover:bg-black/80 dark:hover:bg-sky-500/80 bg-slate-900 dark:bg-sky-500 rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+              class="cursor-not-allowed rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black/80 hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black dark:bg-sky-500 dark:hover:bg-sky-500/80"
             >
               Save
             </button>
