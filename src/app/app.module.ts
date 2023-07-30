@@ -16,7 +16,7 @@ import { AlertComponent } from './alert/alert.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { CookieService } from 'ngx-cookie-service';
 import { AuthService } from './auth/auth.service';
-import { Observable, tap } from 'rxjs';
+import { Observable } from 'rxjs';
 import { UpdateProfileComponent } from './update-profile/update-profile.component';
 
 export function initializeUserData(

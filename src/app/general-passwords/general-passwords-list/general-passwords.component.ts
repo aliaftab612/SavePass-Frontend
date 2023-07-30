@@ -12,6 +12,7 @@ import {
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { AuthService } from 'src/app/auth/auth.service';
 import { GeneralPasswordsResponse } from 'index';
+import { CryptoHelper } from 'src/app/shared/crypto-helper';
 
 @Component({
   selector: 'app-general-passwords',
@@ -60,8 +61,6 @@ export class GeneralPasswordsComponent implements OnInit, OnDestroy {
         this.populateGeneralPasswords();
       },
     });
-
-    this.populateGeneralPasswords();
   }
 
   searchTextChanged(searchGeneralPasswordsElememt: HTMLInputElement) {
@@ -91,9 +90,34 @@ export class GeneralPasswordsComponent implements OnInit, OnDestroy {
           this.totalPages = data.totalPages;
 
           if (data.data.generalPasswords.length != null)
-            this.generalPasswords = Object.values(data.data.generalPasswords);
+            if (typeof Worker !== 'undefined') {
+              if (
+                !this.generalPasswordDataStorageService.generalPasswordsWorker
+              ) {
+                this.generalPasswordDataStorageService.generalPasswordsWorker =
+                  new Worker(
+                    new URL('../general-passwords.worker', import.meta.url)
+                  );
+              }
 
-          this.calculatePaginationStartIndex();
+              this.generalPasswordDataStorageService.generalPasswordsWorker.onmessage =
+                ({ data }) => {
+                  this.generalPasswords = data.generalPasswords;
+                  this.calculatePaginationStartIndex();
+                };
+              this.generalPasswordDataStorageService.generalPasswordsWorker.postMessage(
+                {
+                  generalPasswords: Object.values(data.data.generalPasswords),
+                  encryptionKey: this.authService.getEncryptionKey(),
+                }
+              );
+            } else {
+              this.generalPasswords = CryptoHelper.decryptGeneralPasswords(
+                Object.values(data.data.generalPasswords),
+                this.authService.getEncryptionKey()
+              );
+              this.calculatePaginationStartIndex();
+            }
         },
         error: (error) => {
           if (error.status == 401) {

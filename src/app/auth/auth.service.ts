@@ -8,13 +8,17 @@ import { User } from './user.model';
 import { environment } from 'src/environments/environment';
 import { LoginSignupResponse, UserDataResponse } from 'index';
 import { Location } from '@angular/common';
+import { CryptoHelper } from '../shared/crypto-helper';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private user: User = null;
+  private encryptionKey: string = null;
   isAuthenticatedEvent: Subject<User> = new Subject<User>();
+  isAuthenticationFailed: Subject<boolean> = new Subject<boolean>();
+  authWorker: Worker = null;
 
   constructor(
     private http: HttpClient,
@@ -39,12 +43,49 @@ export class AuthService {
   });
 
   authenticate(email: string, password: string, isSignUp = false) {
+    const hashIterations = environment.encryptionKeyHashIterations;
+
+    if (typeof Worker !== 'undefined') {
+      if (!this.authWorker) {
+        this.authWorker = new Worker(new URL('./auth.worker', import.meta.url));
+      }
+
+      this.authWorker.onmessage = ({ data }) => {
+        this.encryptionKey = data.keys.encryptionKey;
+        const loginHash = data.keys.loginHash;
+
+        this.sendAuthenticationRequest(email, loginHash, isSignUp);
+      };
+      this.authWorker.postMessage({
+        password,
+        username: email,
+        iterations: hashIterations,
+      });
+    } else {
+      const keys = CryptoHelper.generateEncryptionKeyAndLoginHash(
+        password,
+        email,
+        hashIterations
+      );
+
+      this.encryptionKey = keys.encryptionKey;
+      const loginHash = keys.loginHash;
+
+      this.sendAuthenticationRequest(email, loginHash, isSignUp);
+    }
+  }
+
+  private sendAuthenticationRequest(
+    email: string,
+    loginHash: string,
+    isSignUp = false
+  ) {
     this.http
       .post<LoginSignupResponse>(
         `${environment.serverBaseUrl}/api/v1/${isSignUp ? 'signup' : 'login'}`,
         {
           email,
-          password,
+          password: loginHash,
         },
         { withCredentials: true }
       )
@@ -54,6 +95,7 @@ export class AuthService {
         },
         error: (error) => {
           this.alertService.failureAlertEvent.next(error.error.message);
+          this.isAuthenticationFailed.next(true);
         },
       });
   }
@@ -142,5 +184,9 @@ export class AuthService {
       return Object.create(this.user);
     }
     return null;
+  }
+
+  getEncryptionKey() {
+    return this.encryptionKey !== null ? `${this.encryptionKey}` : null;
   }
 }

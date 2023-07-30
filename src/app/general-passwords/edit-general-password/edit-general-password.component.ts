@@ -7,6 +7,7 @@ import { AuthService } from 'src/app/auth/auth.service';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { AlertService } from 'src/app/alert/alert.service';
 import { GeneralPasswordResponse } from 'index';
+import { CryptoHelper } from 'src/app/shared/crypto-helper';
 
 @Component({
   selector: 'app-edit-general-password',
@@ -37,7 +38,10 @@ export class EditGeneralPasswordComponent implements OnInit, OnDestroy {
         .subscribe({
           next: (generalPassword: GeneralPasswordResponse) => {
             if (generalPassword != null) {
-              this.generalPassword = generalPassword.data.generalPassword;
+              this.generalPassword = CryptoHelper.decryptGeneralPassword(
+                generalPassword.data.generalPassword,
+                this.authService.getEncryptionKey()
+              );
             } else {
               this.router.navigate(['/not-found'], {
                 queryParams: {

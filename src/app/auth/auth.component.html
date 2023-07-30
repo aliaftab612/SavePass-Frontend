@@ -113,7 +113,20 @@
             </div>
           </div>
           <div>
+            <div
+              *ngIf="showLoadingSpinner"
+              class="flex items-center justify-center px-3.5 py-2.5"
+            >
+              <fa-icon
+                class="text-slate-900 dark:text-sky-500"
+                [icon]="loadingSpinnerIcon"
+                [spin]="true"
+                size="2xl"
+              >
+              </fa-icon>
+            </div>
             <button
+              *ngIf="!showLoadingSpinner"
               type="button"
               [class]="
                 ((

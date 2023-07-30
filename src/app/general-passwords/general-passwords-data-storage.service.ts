@@ -6,10 +6,12 @@ import { User } from '../auth/user.model';
 import { GeneralPassword } from './general-password.model';
 import { GeneralPasswordResponse, GeneralPasswordsResponse } from 'index';
 import { environment } from 'src/environments/environment';
+import { CryptoHelper } from '../shared/crypto-helper';
 
 @Injectable({ providedIn: 'root' })
 export class GeneralPasswordsDataStorageService {
   user: User;
+  generalPasswordsWorker: Worker = null;
 
   constructor(private http: HttpClient, private authService: AuthService) {
     this.user = authService.getUser();
@@ -48,10 +50,15 @@ export class GeneralPasswordsDataStorageService {
   addGeneralPassword(
     generalPassword: GeneralPassword
   ): Observable<GeneralPasswordResponse> {
+    const encryptedGeneralPassword = CryptoHelper.encryptGeneralPassword(
+      generalPassword,
+      this.authService.getEncryptionKey()
+    );
+
     const generalPasswordAddObservable =
       this.http.post<GeneralPasswordResponse>(
         `${environment.serverBaseUrl}/api/v1/general-passwords`,
-        generalPassword,
+        encryptedGeneralPassword,
         { withCredentials: true }
       );
 
@@ -62,10 +69,15 @@ export class GeneralPasswordsDataStorageService {
     id: string,
     generalPassword: GeneralPassword
   ): Observable<GeneralPasswordResponse> {
+    const encryptedGeneralPassword = CryptoHelper.encryptGeneralPassword(
+      generalPassword,
+      this.authService.getEncryptionKey()
+    );
+
     const generalPasswordUpdateObservable =
       this.http.patch<GeneralPasswordResponse>(
         `${environment.serverBaseUrl}/api/v1/general-passwords/${id}`,
-        generalPassword,
+        encryptedGeneralPassword,
         { withCredentials: true }
       );
 

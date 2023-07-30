@@ -24,3 +24,8 @@ interface GeneralPasswordResponse {
   status: string;
   data: { generalPassword: GeneralPassword };
 }
+
+interface AuthenticationHashedKeys {
+  encryptionKey: string;
+  loginHash: string;
+}
