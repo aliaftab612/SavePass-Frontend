@@ -8,6 +8,7 @@ import {
   faEyeSlash,
   IconDefinition,
   faCopy,
+  faSpinner,
 } from '@fortawesome/free-solid-svg-icons';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { AuthService } from 'src/app/auth/auth.service';
@@ -28,6 +29,8 @@ export class GeneralPasswordsComponent implements OnInit, OnDestroy {
   startPage = 1;
   searchText: string = '';
   searchTimer: any;
+  showLoadingSpinner: boolean = false;
+  loadingSpinnerIcon: IconDefinition = faSpinner;
 
   constructor(
     private generalPasswordDataStorageService: GeneralPasswordsDataStorageService,
@@ -83,50 +86,87 @@ export class GeneralPasswordsComponent implements OnInit, OnDestroy {
   }
 
   populateGeneralPasswords() {
-    this.generalPasswordDataStorageService
-      .getGeneralPasswords(this.currentPage, this.searchText)
-      .subscribe({
-        next: (data: GeneralPasswordsResponse) => {
-          this.totalPages = data.totalPages;
+    this.showLoadingSpinner = true;
+    if (
+      this.generalPasswordDataStorageService.encryptedGeneralPasswords !== null
+    ) {
+      this.decryptGeneralPasswordsOnWorkerThread(
+        this.generalPasswordDataStorageService.encryptedGeneralPasswords
+      );
+    } else {
+      this.generalPasswordDataStorageService
+        .getGeneralPasswords(this.currentPage, this.searchText)
+        .subscribe({
+          next: (data: GeneralPasswordsResponse) => {
+            if (data.data.generalPasswords.length != null) {
+              this.generalPasswordDataStorageService.encryptedGeneralPasswords =
+                data.data.generalPasswords;
 
-          if (data.data.generalPasswords.length != null)
-            if (typeof Worker !== 'undefined') {
-              if (
-                !this.generalPasswordDataStorageService.generalPasswordsWorker
-              ) {
-                this.generalPasswordDataStorageService.generalPasswordsWorker =
-                  new Worker(
-                    new URL('../general-passwords.worker', import.meta.url)
-                  );
-              }
-
-              this.generalPasswordDataStorageService.generalPasswordsWorker.onmessage =
-                ({ data }) => {
-                  this.generalPasswords = data.generalPasswords;
-                  this.calculatePaginationStartIndex();
-                };
-              this.generalPasswordDataStorageService.generalPasswordsWorker.postMessage(
-                {
-                  generalPasswords: Object.values(data.data.generalPasswords),
-                  encryptionKey: this.authService.getEncryptionKey(),
-                }
+              this.decryptGeneralPasswordsOnWorkerThread(
+                this.generalPasswordDataStorageService.encryptedGeneralPasswords
               );
-            } else {
-              this.generalPasswords = CryptoHelper.decryptGeneralPasswords(
-                Object.values(data.data.generalPasswords),
-                this.authService.getEncryptionKey()
-              );
-              this.calculatePaginationStartIndex();
             }
-        },
-        error: (error) => {
-          if (error.status == 401) {
-            this.authService.logout();
-            return;
-          }
-          this.alertService.failureAlertEvent.next(error.error.message);
-        },
-      });
+          },
+          error: (error) => {
+            this.showLoadingSpinner = false;
+            if (error.status == 401) {
+              this.authService.logout();
+              return;
+            }
+            this.alertService.failureAlertEvent.next(error.error.message);
+          },
+        });
+    }
+  }
+
+  private decryptGeneralPasswordsOnWorkerThread(
+    encryptedGeneralPasswords: GeneralPassword[]
+  ) {
+    if (typeof Worker !== 'undefined') {
+      if (!this.generalPasswordDataStorageService.generalPasswordsWorker) {
+        this.generalPasswordDataStorageService.generalPasswordsWorker =
+          new Worker(new URL('../general-passwords.worker', import.meta.url));
+      }
+
+      this.generalPasswordDataStorageService.generalPasswordsWorker.onmessage =
+        ({ data }) => {
+          const decryptedGeneralPasswords = data.generalPasswords;
+
+          const filteredGeneralPasswordsObj =
+            this.generalPasswordDataStorageService.searchAndPaginateGeneralPasswords(
+              decryptedGeneralPasswords,
+              this.currentPage,
+              this.searchText
+            );
+
+          this.totalPages = filteredGeneralPasswordsObj.totalPages;
+          this.generalPasswords = filteredGeneralPasswordsObj.generalPasswords;
+          this.calculatePaginationStartIndex();
+          this.showLoadingSpinner = false;
+        };
+      this.generalPasswordDataStorageService.generalPasswordsWorker.postMessage(
+        {
+          generalPasswords: Object.values(encryptedGeneralPasswords),
+          encryptionKey: this.authService.getEncryptionKey(),
+        }
+      );
+    } else {
+      const decryptedGeneralPasswords = CryptoHelper.decryptGeneralPasswords(
+        Object.values(encryptedGeneralPasswords),
+        this.authService.getEncryptionKey()
+      );
+
+      const filteredGeneralPasswordsObj =
+        this.generalPasswordDataStorageService.searchAndPaginateGeneralPasswords(
+          decryptedGeneralPasswords,
+          this.currentPage,
+          this.searchText
+        );
+      this.totalPages = filteredGeneralPasswordsObj.totalPages;
+      this.generalPasswords = filteredGeneralPasswordsObj.generalPasswords;
+      this.calculatePaginationStartIndex();
+      this.showLoadingSpinner = false;
+    }
   }
 
   calculatePaginationStartIndex() {
@@ -181,6 +221,10 @@ export class GeneralPasswordsComponent implements OnInit, OnDestroy {
   onDelete(id: string) {
     this.generalPasswordDataStorageService.deleteGeneralPassword(id).subscribe({
       complete: () => {
+        this.generalPasswordDataStorageService.encryptedGeneralPasswords =
+          this.generalPasswordDataStorageService.encryptedGeneralPasswords.filter(
+            (element: GeneralPassword) => element._id !== id
+          );
         this.alertService.successAlertEvent.next('Deleted Successfully!');
 
         if (this.generalPasswords.length === 1 && this.currentPage !== 1) {
@@ -222,6 +266,7 @@ export class GeneralPasswordsComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    clearTimeout(this.searchTimer);
     this.alertService.resetAlertEvent.next();
   }
 }

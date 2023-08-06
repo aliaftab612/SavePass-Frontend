@@ -170,6 +170,7 @@ export class AuthService {
       .subscribe({
         complete: () => {
           this.user = null;
+          this.encryptionKey = null;
           this.router.navigate(['auth']);
           this.isAuthenticatedEvent.next(null);
         },

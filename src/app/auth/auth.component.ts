@@ -1,5 +1,5 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { NgForm, NgModel } from '@angular/forms';
+import { Component, OnDestroy } from '@angular/core';
+import { NgForm } from '@angular/forms';
 import { AlertService } from '../alert/alert.service';
 import { AuthService } from './auth.service';
 import { Subscription } from 'rxjs';

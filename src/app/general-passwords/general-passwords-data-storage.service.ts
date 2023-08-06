@@ -12,6 +12,7 @@ import { CryptoHelper } from '../shared/crypto-helper';
 export class GeneralPasswordsDataStorageService {
   user: User;
   generalPasswordsWorker: Worker = null;
+  encryptedGeneralPasswords: GeneralPassword[] = null;
 
   constructor(private http: HttpClient, private authService: AuthService) {
     this.user = authService.getUser();
@@ -19,6 +20,8 @@ export class GeneralPasswordsDataStorageService {
     this.authService.isAuthenticatedEvent.subscribe((userData: User) => {
       if (userData !== null) {
         this.user = userData;
+      } else {
+        this.encryptedGeneralPasswords = null;
       }
     });
   }
@@ -28,7 +31,7 @@ export class GeneralPasswordsDataStorageService {
     search: string
   ): Observable<GeneralPasswordsResponse> {
     const generalPasswordObservable = this.http.get<GeneralPasswordsResponse>(
-      `${environment.serverBaseUrl}/api/v1/general-passwords?page=${page}&filter=${search}`,
+      `${environment.serverBaseUrl}/api/v1/general-passwords`,
       {
         withCredentials: true,
       }
@@ -93,5 +96,23 @@ export class GeneralPasswordsDataStorageService {
     );
 
     return generalPasswordObservable;
+  }
+
+  searchAndPaginateGeneralPasswords(
+    decryptedGeneralPasswords: GeneralPassword[],
+    page: number = 1,
+    search: string = ''
+  ): { generalPasswords: GeneralPassword[]; totalPages: number } {
+    let generalPasswordsResult = decryptedGeneralPasswords.filter(
+      (element) =>
+        element.website.includes(search) || element.username.includes(search)
+    );
+
+    const limit = 10;
+    const totalPages = Math.ceil(generalPasswordsResult.length / limit);
+    const startIndex = (page - 1) * limit;
+
+    generalPasswordsResult = generalPasswordsResult.splice(startIndex, limit);
+    return { generalPasswords: generalPasswordsResult, totalPages };
   }
 }
