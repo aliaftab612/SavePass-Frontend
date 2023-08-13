@@ -10,6 +10,7 @@ interface UserDataResponse {
 
 interface LoginSignupResponse {
   status: string;
+  token: string;
 }
 
 interface GeneralPasswordsResponse {
@@ -18,12 +19,23 @@ interface GeneralPasswordsResponse {
   data: { generalPasswords: GeneralPassword[] };
 }
 
+interface UpdateAppLockoutTime {
+  status: string;
+  data: { appLockoutMinutes: number };
+}
+
 interface GeneralPasswordResponse {
   status: string;
   data: { generalPassword: GeneralPassword };
 }
 
+interface PreLoginResponse {
+  status: string;
+  data: { hashIterations: number };
+}
+
 interface AuthenticationHashedKeys {
   encryptionKey: string;
   loginHash: string;
+  localLoginHash: string;
 }

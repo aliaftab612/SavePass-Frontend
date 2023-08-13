@@ -165,6 +165,7 @@ export class EditGeneralPasswordComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.generalPassword = null;
     if (
       this.alertService.getDisplayAlert() &&
       !this.alertService.getSuccessAlert()

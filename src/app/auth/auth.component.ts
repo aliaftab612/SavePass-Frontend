@@ -38,6 +38,7 @@ export class AuthComponent implements OnDestroy {
       this.authService.authenticate(
         form.value.username,
         form.value.password,
+        false,
         !this.loginMode
       );
       this.showLoadingSpinner = true;

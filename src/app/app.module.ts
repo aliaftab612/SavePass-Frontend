@@ -18,6 +18,8 @@ import { CookieService } from 'ngx-cookie-service';
 import { AuthService } from './auth/auth.service';
 import { Observable } from 'rxjs';
 import { UpdateProfileComponent } from './update-profile/update-profile.component';
+import { LockComponent } from './lock/lock.component';
+import { UpdateLockTimeComponent } from './update-lock-time/update-lock-time.component';
 
 export function initializeUserData(
   authService: AuthService
@@ -37,6 +39,8 @@ export function initializeUserData(
     NotFoundComponent,
     AlertComponent,
     UpdateProfileComponent,
+    LockComponent,
+    UpdateLockTimeComponent,
   ],
   imports: [
     BrowserModule,

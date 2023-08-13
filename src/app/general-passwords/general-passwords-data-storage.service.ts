@@ -10,17 +10,12 @@ import { CryptoHelper } from '../shared/crypto-helper';
 
 @Injectable({ providedIn: 'root' })
 export class GeneralPasswordsDataStorageService {
-  user: User;
   generalPasswordsWorker: Worker = null;
   encryptedGeneralPasswords: GeneralPassword[] = null;
 
   constructor(private http: HttpClient, private authService: AuthService) {
-    this.user = authService.getUser();
-
     this.authService.isAuthenticatedEvent.subscribe((userData: User) => {
-      if (userData !== null) {
-        this.user = userData;
-      } else {
+      if (userData === null) {
         this.encryptedGeneralPasswords = null;
       }
     });
@@ -33,7 +28,7 @@ export class GeneralPasswordsDataStorageService {
     const generalPasswordObservable = this.http.get<GeneralPasswordsResponse>(
       `${environment.serverBaseUrl}/api/v1/general-passwords`,
       {
-        withCredentials: true,
+        headers: { Authorization: this.authService.getToken() },
       }
     );
 
@@ -44,7 +39,9 @@ export class GeneralPasswordsDataStorageService {
     const generalPasswordDeleteObservable =
       this.http.delete<GeneralPasswordResponse>(
         `${environment.serverBaseUrl}/api/v1/general-passwords/${id}`,
-        { withCredentials: true }
+        {
+          headers: { Authorization: this.authService.getToken() },
+        }
       );
 
     return generalPasswordDeleteObservable;
@@ -62,7 +59,9 @@ export class GeneralPasswordsDataStorageService {
       this.http.post<GeneralPasswordResponse>(
         `${environment.serverBaseUrl}/api/v1/general-passwords`,
         encryptedGeneralPassword,
-        { withCredentials: true }
+        {
+          headers: { Authorization: this.authService.getToken() },
+        }
       );
 
     return generalPasswordAddObservable;
@@ -81,7 +80,9 @@ export class GeneralPasswordsDataStorageService {
       this.http.patch<GeneralPasswordResponse>(
         `${environment.serverBaseUrl}/api/v1/general-passwords/${id}`,
         encryptedGeneralPassword,
-        { withCredentials: true }
+        {
+          headers: { Authorization: this.authService.getToken() },
+        }
       );
 
     return generalPasswordUpdateObservable;
@@ -91,7 +92,7 @@ export class GeneralPasswordsDataStorageService {
     const generalPasswordObservable = this.http.get<GeneralPasswordResponse>(
       `${environment.serverBaseUrl}/api/v1/general-passwords/${id}`,
       {
-        withCredentials: true,
+        headers: { Authorization: this.authService.getToken() },
       }
     );
 

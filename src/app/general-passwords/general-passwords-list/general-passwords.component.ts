@@ -266,6 +266,7 @@ export class GeneralPasswordsComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.generalPasswords = null;
     clearTimeout(this.searchTimer);
     this.alertService.resetAlertEvent.next();
   }

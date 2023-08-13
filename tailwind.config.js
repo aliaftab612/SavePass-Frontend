@@ -9,6 +9,8 @@ module.exports = {
     "src/app/update-profile/update-profile.component.html",
     "src/app/not-found/not-found.component.html",
     "src/index.html",
+    "src/app/lock/lock.component.html",
+    "src/app/update-lock-time/update-lock-time.component.html",
   ],
   theme: {
     extend: {},

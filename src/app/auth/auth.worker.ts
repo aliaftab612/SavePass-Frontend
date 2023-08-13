@@ -7,7 +7,8 @@ addEventListener('message', ({ data }) => {
     keys: CryptoHelper.generateEncryptionKeyAndLoginHash(
       data.password,
       data.username,
-      data.iterations
+      data.iterations,
+      data.localAuthorizationHash
     ),
   };
   postMessage(response);

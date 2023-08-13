@@ -15,6 +15,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
   isMobileViewHamburgerClicked = false;
   user: User;
   selectedTheme: string = 'system';
+  isLocked: boolean = false;
+  isLockedEventSubscription: Subscription;
 
   constructor(private authService: AuthService, private router: Router) {}
 
@@ -26,11 +28,24 @@ export class HeaderComponent implements OnInit, OnDestroy {
       this.authenticated = userData !== null ? true : false;
       this.user = userData;
     });
+
+    this.authService.isLockedEvent.subscribe((data: boolean) => {
+      this.isLocked = data;
+    });
   }
 
   setSelectedTheme() {
     const theme = localStorage.getItem('theme');
     this.selectedTheme = theme ? theme : 'system';
+  }
+
+  lock() {
+    this.authService.lock();
+  }
+
+  updateLockTime() {
+    this.router.navigate(['update-lock-time']);
+    this.mobileViewHamburgerClose();
   }
 
   updateProfile() {
@@ -53,5 +68,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.isAuthenticatedEventSubscription.unsubscribe();
+    this.isLockedEventSubscription.unsubscribe();
   }
 }

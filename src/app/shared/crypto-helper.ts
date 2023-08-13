@@ -37,17 +37,27 @@ export class CryptoHelper {
   static generateEncryptionKeyAndLoginHash = (
     password: string,
     username: string,
-    iterations: number
+    iterations: number,
+    localAuthorization: boolean = false
   ): AuthenticationHashedKeys => {
     const encryptionKey = CryptoHelper.pkbfd2SHA256(
       password,
       username,
       iterations
     );
+    let loginHash = null;
 
-    const loginHash = CryptoHelper.pkbfd2SHA256(encryptionKey, password, 1);
+    if (!localAuthorization) {
+      loginHash = CryptoHelper.pkbfd2SHA256(encryptionKey, password, 1);
+    }
 
-    return { encryptionKey, loginHash };
+    const localLoginHash = CryptoHelper.pkbfd2SHA256(
+      encryptionKey,
+      password,
+      2
+    );
+
+    return { encryptionKey, loginHash, localLoginHash };
   };
 
   static encryptGeneralPassword(

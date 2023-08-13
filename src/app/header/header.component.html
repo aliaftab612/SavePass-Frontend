@@ -7,7 +7,7 @@
       <ul class="ml-12 inline-flex space-x-8">
         <li>
           <a
-            *ngIf="authenticated"
+            *ngIf="authenticated && !isLocked"
             routerLink="general-passwords"
             routerLinkActive="active"
             class="text-sm font-semibold text-gray-800 dark:text-white"
@@ -137,7 +137,7 @@
           >System</a
         >
       </div>
-      <div *ngIf="authenticated" class="flex items-center">
+      <div *ngIf="authenticated && !isLocked" class="flex items-center">
         <div
           *ngIf="user.firstName && user.firstName != ''"
           style="margin-right: 8px; margin-left: 8px"
@@ -170,6 +170,18 @@
             <a
               class="dropdown-item dark:text-white dark:hover:bg-slate-800"
               style="cursor: pointer"
+              (click)="updateLockTime()"
+              >Update Lock Time</a
+            >
+            <a
+              class="dropdown-item dark:text-white dark:hover:bg-slate-800"
+              style="cursor: pointer"
+              (click)="lock()"
+              >Lock Now</a
+            >
+            <a
+              class="dropdown-item dark:text-white dark:hover:bg-slate-800"
+              style="cursor: pointer"
               (click)="logout()"
               >Logout</a
             >
@@ -197,7 +209,7 @@
       </div>
     </div>
     <div
-      *ngIf="authenticated && isMobileViewHamburgerClicked"
+      *ngIf="authenticated && isMobileViewHamburgerClicked && !isLocked"
       class="absolute inset-x-0 top-0 z-50 origin-top-right transform p-2 transition lg:hidden"
     >
       <div
@@ -236,7 +248,7 @@
           <div class="mt-6">
             <nav class="grid gap-y-4">
               <a
-                *ngIf="authenticated"
+                *ngIf="authenticated && !isLocked"
                 routerLink="general-passwords"
                 routerLinkActive="active"
                 (click)="mobileViewHamburgerClose()"
