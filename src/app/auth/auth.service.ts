@@ -30,6 +30,7 @@ export class AuthService {
   private localAuthorizationHash: string = null;
   isUnlockEventStarted: Subject<boolean> = new Subject<boolean>();
   isLockedEvent: Subject<boolean> = new Subject<boolean>();
+  isProfileUpdateEventStarted: Subject<boolean> = new Subject<boolean>();
   private onTimerStartSubscription: Subscription;
   private onTimeoutSubscription: Subscription;
   private hashIterations: number = null;
@@ -244,6 +245,7 @@ export class AuthService {
     profilePhotoUrl: string,
     isSignUp = false
   ) {
+    this.isProfileUpdateEventStarted.next(true);
     this.http
       .patch<UserDataResponse>(
         `${environment.serverBaseUrl}/api/v1/user`,
@@ -261,6 +263,7 @@ export class AuthService {
           } else {
             this._location.back();
           }
+          this.isProfileUpdateEventStarted.next(false);
           this.alertService.successAlertEvent.next(
             'Profile Updated Successfully!'
           );
@@ -270,6 +273,7 @@ export class AuthService {
             this.logout();
             return;
           }
+          this.isProfileUpdateEventStarted.next(false);
           this.alertService.failureAlertEvent.next(error.error.message);
         },
       });

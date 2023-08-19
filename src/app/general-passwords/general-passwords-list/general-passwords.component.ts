@@ -14,6 +14,7 @@ import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { AuthService } from 'src/app/auth/auth.service';
 import { GeneralPasswordsResponse } from 'index';
 import { CryptoHelper } from 'src/app/shared/crypto-helper';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-general-passwords',
@@ -37,7 +38,8 @@ export class GeneralPasswordsComponent implements OnInit, OnDestroy {
     private router: Router,
     private alertService: AlertService,
     private authService: AuthService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private toastr: ToastrService
   ) {}
 
   ngOnInit(): void {
@@ -199,6 +201,7 @@ export class GeneralPasswordsComponent implements OnInit, OnDestroy {
 
   copyPassword(password: string) {
     navigator.clipboard.writeText(password);
+    this.toastr.info('Password copied');
   }
 
   togglePasswordVisibility(

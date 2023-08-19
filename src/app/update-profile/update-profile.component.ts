@@ -15,6 +15,8 @@ export class UpdateProfileComponent implements OnInit, OnDestroy {
   isSignUp: boolean = false;
   user: User;
   authEventSubscription: Subscription;
+  isProfileUpdateEventStartedSubscription: Subscription;
+  updateInProgress: boolean = false;
 
   constructor(
     private router: Router,
@@ -33,9 +35,21 @@ export class UpdateProfileComponent implements OnInit, OnDestroy {
       this.authService.isAuthenticatedEvent.subscribe((user) => {
         this.user = user;
       });
+
+    this.isProfileUpdateEventStartedSubscription =
+      this.authService.isProfileUpdateEventStarted.subscribe({
+        next: (data: boolean) => {
+          if (data) {
+            this.updateInProgress = true;
+          } else {
+            this.updateInProgress = false;
+          }
+        },
+      });
   }
 
   updateProfile(form: NgForm) {
+    if (this.updateInProgress) return;
     if (form.valid) {
       this.authService.updateUserData(
         form.value.firstname,
@@ -56,5 +70,6 @@ export class UpdateProfileComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.authEventSubscription.unsubscribe();
+    this.isProfileUpdateEventStartedSubscription.unsubscribe();
   }
 }

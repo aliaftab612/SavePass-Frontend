@@ -2,3 +2,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@layer components {
+  .psm__progress-bar-item {
+    @apply !border-r-white dark:!border-r-slate-800;
+  }
+}

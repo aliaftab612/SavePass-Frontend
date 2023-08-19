@@ -6,7 +6,7 @@
       <h2 class="text-center text-2xl font-bold leading-tight dark:text-white">
         Update Profile
       </h2>
-      <form #form="ngForm" class="mt-8">
+      <form #form="ngForm" class="mt-8" (ngSubmit)="updateProfile(form)">
         <div class="space-y-5">
           <div>
             <label
@@ -72,9 +72,8 @@
           </div>
           <div class="flex flex-row justify-center gap-3">
             <button
-              type="button"
+              type="submit"
               [disabled]="!form.valid"
-              (click)="updateProfile(form)"
               class="cursor-not-allowed rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black/80 hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black dark:bg-sky-500 dark:hover:bg-sky-500/80"
             >
               Save

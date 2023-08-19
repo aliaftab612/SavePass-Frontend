@@ -17,7 +17,11 @@
           {{ loginMode ? "Create a free account" : "Sign In" }}
         </button>
       </p>
-      <form #form="ngForm" class="mt-8">
+      <form
+        #form="ngForm"
+        class="mt-8"
+        (ngSubmit)="onAuthenticationClick(form)"
+      >
         <div class="space-y-5">
           <div>
             <label
@@ -31,16 +35,23 @@
                 class="flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 dark:text-white"
                 placeholder="Username"
                 id="username"
+                email
                 required
                 ngModel
                 name="username"
                 #username="ngModel"
               />
               <div
-                *ngIf="!username.valid && username.touched"
+                *ngIf="username.errors?.['required'] && username.touched"
                 style="color: red"
               >
                 * This field is required.
+              </div>
+              <div
+                *ngIf="username.errors?.['email'] && username.touched"
+                style="color: red"
+              >
+                * Invalid Email Address.
               </div>
             </div>
           </div>
@@ -54,22 +65,48 @@
               </label>
             </div>
             <div class="mt-2">
-              <input
-                class="flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 dark:text-white"
-                type="password"
-                placeholder="Password"
-                id="password"
-                required
-                ngModel
-                name="password"
-                (input)="setIsPasswordAndConfrimPasswordMaching(form)"
-                #password="ngModel"
-              />
+              <div class="flex flex-row">
+                <input
+                  class="flex h-10 w-full rounded-l-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 dark:text-white"
+                  [type]="hidePassword ? 'password' : 'text'"
+                  placeholder="Password"
+                  id="password"
+                  required
+                  minlength="12"
+                  ngModel
+                  name="password"
+                  (input)="setIsPasswordAndConfrimPasswordMaching(form)"
+                  #password="ngModel"
+                />
+                <button
+                  type="button"
+                  (click)="togglePasswordVisibility()"
+                  class="flex h-10 w-10 items-center justify-center rounded-r-md border-b border-r border-t border-gray-300 bg-transparent"
+                >
+                  <fa-icon
+                    [icon]="passwordHiddenImg"
+                    size="lg"
+                    class="dark:text-white"
+                  ></fa-icon>
+                </button>
+              </div>
+              <password-strength-meter
+                *ngIf="!loginMode"
+                class="psm__progress-bar-item"
+                [minPasswordLength]="12"
+                [password]="form.getControl(password).getRawValue()"
+              ></password-strength-meter>
               <div
-                *ngIf="!password.valid && password.touched"
+                *ngIf="password.errors?.['required'] && password.touched"
                 style="color: red"
               >
                 * This field is required.
+              </div>
+              <div
+                *ngIf="password.errors?.['minlength'] && password.touched"
+                style="color: red"
+              >
+                * Password must be at least 12 characters long.
               </div>
             </div>
           </div>
@@ -83,17 +120,30 @@
               </label>
             </div>
             <div class="mt-2">
-              <input
-                class="flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 dark:text-white"
-                type="password"
-                placeholder="Confirm Password"
-                id="confirmPassword"
-                required
-                ngModel
-                name="confirmPassword"
-                (input)="setIsPasswordAndConfrimPasswordMaching(form)"
-                #confirmPassword="ngModel"
-              />
+              <div class="flex flex-row">
+                <input
+                  class="flex h-10 w-full rounded-l-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 dark:text-white"
+                  [type]="hidePassword ? 'password' : 'text'"
+                  placeholder="Confirm Password"
+                  id="confirmPassword"
+                  required
+                  ngModel
+                  name="confirmPassword"
+                  (input)="setIsPasswordAndConfrimPasswordMaching(form)"
+                  #confirmPassword="ngModel"
+                />
+                <button
+                  type="button"
+                  (click)="togglePasswordVisibility()"
+                  class="flex h-10 w-10 items-center justify-center rounded-r-md border-b border-r border-t border-gray-300 bg-transparent"
+                >
+                  <fa-icon
+                    [icon]="passwordHiddenImg"
+                    size="lg"
+                    class="dark:text-white"
+                  ></fa-icon>
+                </button>
+              </div>
             </div>
             <div
               *ngIf="!confirmPassword.valid && confirmPassword.touched"
@@ -127,7 +177,7 @@
             </div>
             <button
               *ngIf="!showLoadingSpinner"
-              type="button"
+              type="submit"
               [class]="
                 ((
                   loginMode
@@ -143,7 +193,6 @@
                   ? !form.valid
                   : !form.valid || !isPasswordAndConfrimPasswordMaching
               "
-              (click)="onAuthenticationClick(form)"
             >
               {{ loginMode ? "Get started" : "Create Account" }}
               <svg

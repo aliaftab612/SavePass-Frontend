@@ -3,7 +3,12 @@ import { NgForm } from '@angular/forms';
 import { AlertService } from '../alert/alert.service';
 import { AuthService } from './auth.service';
 import { Subscription } from 'rxjs';
-import { faSpinner, IconDefinition } from '@fortawesome/free-solid-svg-icons';
+import {
+  faEye,
+  faSpinner,
+  faEyeSlash,
+  IconDefinition,
+} from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-auth',
@@ -16,6 +21,8 @@ export class AuthComponent implements OnDestroy {
   isAuthenticationFailedSubscription: Subscription;
   showLoadingSpinner: boolean = false;
   loadingSpinnerIcon: IconDefinition = faSpinner;
+  passwordHiddenImg: IconDefinition = faEye;
+  hidePassword: boolean = true;
 
   constructor(
     private authService: AuthService,
@@ -27,13 +34,22 @@ export class AuthComponent implements OnDestroy {
     }
   }
 
+  togglePasswordVisibility() {
+    this.hidePassword = !this.hidePassword;
+    this.passwordHiddenImg =
+      this.passwordHiddenImg === faEye ? faEyeSlash : faEye;
+  }
+
   SwitchAuthMode(form: NgForm) {
     this.alertService.resetAlertEvent.next();
     form.reset();
+    this.passwordHiddenImg = faEye;
+    this.hidePassword = true;
     this.loginMode = !this.loginMode;
   }
 
   onAuthenticationClick(form: NgForm) {
+    if (this.showLoadingSpinner) return;
     if (form.valid) {
       this.authService.authenticate(
         form.value.username,

@@ -1,7 +1,7 @@
 import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
-
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HeaderComponent } from './header/header.component';
@@ -20,6 +20,8 @@ import { Observable } from 'rxjs';
 import { UpdateProfileComponent } from './update-profile/update-profile.component';
 import { LockComponent } from './lock/lock.component';
 import { UpdateLockTimeComponent } from './update-lock-time/update-lock-time.component';
+import { PasswordStrengthMeterModule } from 'angular-password-strength-meter';
+import { ToastrModule, provideToastr } from 'ngx-toastr';
 
 export function initializeUserData(
   authService: AuthService
@@ -49,6 +51,9 @@ export function initializeUserData(
     HttpClientModule,
     FormsModule,
     FontAwesomeModule,
+    PasswordStrengthMeterModule.forRoot(),
+    ToastrModule.forRoot(),
+    BrowserAnimationsModule,
   ],
   providers: [
     AlertService,
@@ -59,6 +64,11 @@ export function initializeUserData(
       deps: [AuthService],
       multi: true,
     },
+    provideToastr({
+      preventDuplicates: true,
+      resetTimeoutOnDuplicate: true,
+      closeButton: true,
+    }),
   ],
   bootstrap: [AppComponent],
 })

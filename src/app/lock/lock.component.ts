@@ -4,11 +4,12 @@ import {
   faSpinner,
   IconDefinition,
   faLockOpen,
+  faEye,
+  faEyeSlash,
 } from '@fortawesome/free-solid-svg-icons';
 import { AuthService } from '../auth/auth.service';
 import { NgForm } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-lock',
@@ -22,6 +23,8 @@ export class LockComponent implements OnInit, OnDestroy {
   unlockStarted: boolean = false;
   loadingSpinnerIcon: IconDefinition = faSpinner;
   isUnlockEventStartedSubscription: Subscription;
+  passwordHiddenImg: IconDefinition = faEye;
+  hidePassword: boolean = true;
 
   constructor(private authService: AuthService) {}
 
@@ -29,6 +32,12 @@ export class LockComponent implements OnInit, OnDestroy {
     if (this.isUnlockEventStartedSubscription) {
       this.isUnlockEventStartedSubscription.unsubscribe();
     }
+  }
+
+  togglePasswordVisibility() {
+    this.hidePassword = !this.hidePassword;
+    this.passwordHiddenImg =
+      this.passwordHiddenImg === faEye ? faEyeSlash : faEye;
   }
 
   ngOnInit(): void {
@@ -53,6 +62,7 @@ export class LockComponent implements OnInit, OnDestroy {
   }
 
   unlock(form: NgForm) {
+    if (this.unlockStarted) return;
     if (form.valid) {
       this.authService.regenerateEncryptionKeyAndUnlock(
         form.value.password,

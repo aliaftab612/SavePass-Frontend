@@ -8,6 +8,13 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
 import { AlertService } from 'src/app/alert/alert.service';
 import { GeneralPasswordResponse } from 'index';
 import { CryptoHelper } from 'src/app/shared/crypto-helper';
+import {
+  faEye,
+  faEyeSlash,
+  IconDefinition,
+  faCopy,
+} from '@fortawesome/free-solid-svg-icons';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-edit-general-password',
@@ -18,6 +25,10 @@ export class EditGeneralPasswordComponent implements OnInit, OnDestroy {
   generalPassword: GeneralPassword = new GeneralPassword('', '', '', '');
   editMode: boolean = false;
   generalPasswordId: string = '';
+  passwordHiddenImg: IconDefinition = faEye;
+  passwordCopyImg: IconDefinition = faCopy;
+  hidePassword: boolean = true;
+  savingInProgress: boolean = false;
 
   constructor(
     private generalPasswordDataStorageService: GeneralPasswordsDataStorageService,
@@ -25,7 +36,8 @@ export class EditGeneralPasswordComponent implements OnInit, OnDestroy {
     private router: Router,
     private alertService: AlertService,
     private authService: AuthService,
-    private _location: Location
+    private _location: Location,
+    private toastr: ToastrService
   ) {}
 
   ngOnInit(): void {
@@ -35,6 +47,17 @@ export class EditGeneralPasswordComponent implements OnInit, OnDestroy {
 
       this.populateGeneralPasswordDetailsInEditMode();
     }
+  }
+
+  copyPassword(password: string) {
+    navigator.clipboard.writeText(password);
+    this.toastr.info('Password copied');
+  }
+
+  togglePasswordVisibility() {
+    this.hidePassword = !this.hidePassword;
+    this.passwordHiddenImg =
+      this.passwordHiddenImg === faEye ? faEyeSlash : faEye;
   }
 
   private populateGeneralPasswordDetailsInEditMode() {
@@ -95,6 +118,7 @@ export class EditGeneralPasswordComponent implements OnInit, OnDestroy {
 
   saveGeneralPassword(form: NgForm) {
     if (form.valid === true) {
+      this.savingInProgress = true;
       const generalPassword = new GeneralPassword(
         null,
         form.value.website,
@@ -115,7 +139,7 @@ export class EditGeneralPasswordComponent implements OnInit, OnDestroy {
                   data.data.generalPassword
                 );
               }
-
+              this.savingInProgress = false;
               this.router.navigate(['/general-passwords']);
               this.alertService.successAlertEvent.next('Created Successfully!');
             },
@@ -124,6 +148,7 @@ export class EditGeneralPasswordComponent implements OnInit, OnDestroy {
                 this.authService.logout();
                 return;
               }
+              this.savingInProgress = false;
               this.alertService.failureAlertEvent.next(error.error.message);
             },
           });
@@ -145,6 +170,7 @@ export class EditGeneralPasswordComponent implements OnInit, OnDestroy {
                   generalPasswordIndex
                 ] = data.data.generalPassword;
               }
+              this.savingInProgress = false;
               this._location.back();
               this.alertService.successAlertEvent.next('Updated Successfully!');
             },
@@ -153,6 +179,7 @@ export class EditGeneralPasswordComponent implements OnInit, OnDestroy {
                 this.authService.logout();
                 return;
               }
+              this.savingInProgress = false;
               this.alertService.failureAlertEvent.next(error.error.message);
             },
           });

@@ -14,7 +14,7 @@
       <h2 class="text-center text-xl font-bold leading-tight dark:text-white">
         SavePass is locked. Verify your password to continue.
       </h2>
-      <form #form="ngForm" class="mt-8">
+      <form #form="ngForm" class="mt-8" (ngSubmit)="unlock(form)">
         <div *ngIf="username" class="mb-2.5 text-gray-500 dark:text-gray-400">
           Logged in as {{ username }}
         </div>
@@ -29,15 +29,28 @@
               </label>
             </div>
             <div class="mt-2">
-              <input
-                class="flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 dark:text-white"
-                type="password"
-                id="password"
-                required
-                ngModel
-                name="password"
-                #password="ngModel"
-              />
+              <div class="flex flex-row">
+                <input
+                  class="flex h-10 w-full rounded-l-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 dark:text-white"
+                  [type]="hidePassword ? 'password' : 'text'"
+                  id="password"
+                  required
+                  ngModel
+                  name="password"
+                  #password="ngModel"
+                />
+                <button
+                  type="button"
+                  (click)="togglePasswordVisibility()"
+                  class="flex h-10 w-10 items-center justify-center rounded-r-md border-b border-r border-t border-gray-300"
+                >
+                  <fa-icon
+                    [icon]="passwordHiddenImg"
+                    size="lg"
+                    class="dark:text-white"
+                  ></fa-icon>
+                </button>
+              </div>
             </div>
             <div *ngIf="!password.valid && password.touched" style="color: red">
               * This field is required.
@@ -60,8 +73,7 @@
             class="flex flex-row justify-center gap-3"
           >
             <button
-              type="button"
-              (click)="unlock(form)"
+              type="submit"
               [disabled]="!form.valid"
               class="flex cursor-not-allowed items-center justify-center gap-2 rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black dark:bg-sky-500 dark:hover:bg-sky-500/80"
             >
