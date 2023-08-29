@@ -35,6 +35,7 @@
                   [type]="hidePassword ? 'password' : 'text'"
                   id="password"
                   required
+                  minlength="12"
                   ngModel
                   name="password"
                   #password="ngModel"
@@ -52,8 +53,17 @@
                 </button>
               </div>
             </div>
-            <div *ngIf="!password.valid && password.touched" style="color: red">
+            <div
+              *ngIf="password.errors?.['required'] && password.touched"
+              style="color: red"
+            >
               * This field is required.
+            </div>
+            <div
+              *ngIf="password.errors?.['minlength'] && password.touched"
+              style="color: red"
+            >
+              * Password must be at least 12 characters long.
             </div>
           </div>
           <div

@@ -5,7 +5,6 @@ import { GeneralPassword } from '../general-password.model';
 import { GeneralPasswordsDataStorageService } from '../general-passwords-data-storage.service';
 import { AuthService } from 'src/app/auth/auth.service';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { AlertService } from 'src/app/alert/alert.service';
 import { GeneralPasswordResponse } from 'index';
 import { CryptoHelper } from 'src/app/shared/crypto-helper';
 import {
@@ -34,7 +33,6 @@ export class EditGeneralPasswordComponent implements OnInit, OnDestroy {
     private generalPasswordDataStorageService: GeneralPasswordsDataStorageService,
     private route: ActivatedRoute,
     private router: Router,
-    private alertService: AlertService,
     private authService: AuthService,
     private _location: Location,
     private toastr: ToastrService
@@ -110,7 +108,7 @@ export class EditGeneralPasswordComponent implements OnInit, OnDestroy {
               this.authService.logout();
               return;
             }
-            this.alertService.failureAlertEvent.next(error.error.message);
+            this.toastr.error(error.error.message);
           },
         });
     }
@@ -141,7 +139,7 @@ export class EditGeneralPasswordComponent implements OnInit, OnDestroy {
               }
               this.savingInProgress = false;
               this.router.navigate(['/general-passwords']);
-              this.alertService.successAlertEvent.next('Created Successfully!');
+              this.toastr.success('Created Successfully!');
             },
             error: (error) => {
               if (error.status == 401) {
@@ -149,7 +147,7 @@ export class EditGeneralPasswordComponent implements OnInit, OnDestroy {
                 return;
               }
               this.savingInProgress = false;
-              this.alertService.failureAlertEvent.next(error.error.message);
+              this.toastr.error(error.error.message);
             },
           });
       } else {
@@ -172,7 +170,7 @@ export class EditGeneralPasswordComponent implements OnInit, OnDestroy {
               }
               this.savingInProgress = false;
               this._location.back();
-              this.alertService.successAlertEvent.next('Updated Successfully!');
+              this.toastr.success('Updated Successfully!');
             },
             error: (error) => {
               if (error.status == 401) {
@@ -180,7 +178,7 @@ export class EditGeneralPasswordComponent implements OnInit, OnDestroy {
                 return;
               }
               this.savingInProgress = false;
-              this.alertService.failureAlertEvent.next(error.error.message);
+              this.toastr.error(error.error.message);
             },
           });
       }
@@ -193,11 +191,5 @@ export class EditGeneralPasswordComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.generalPassword = null;
-    if (
-      this.alertService.getDisplayAlert() &&
-      !this.alertService.getSuccessAlert()
-    ) {
-      this.alertService.resetAlertEvent.next();
-    }
   }
 }

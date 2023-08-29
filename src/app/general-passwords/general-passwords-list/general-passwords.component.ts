@@ -1,6 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { AlertService } from 'src/app/alert/alert.service';
 import { GeneralPassword } from '../general-password.model';
 import { GeneralPasswordsDataStorageService } from '../general-passwords-data-storage.service';
 import {
@@ -36,7 +35,6 @@ export class GeneralPasswordsComponent implements OnInit, OnDestroy {
   constructor(
     private generalPasswordDataStorageService: GeneralPasswordsDataStorageService,
     private router: Router,
-    private alertService: AlertService,
     private authService: AuthService,
     private route: ActivatedRoute,
     private toastr: ToastrService
@@ -115,7 +113,7 @@ export class GeneralPasswordsComponent implements OnInit, OnDestroy {
               this.authService.logout();
               return;
             }
-            this.alertService.failureAlertEvent.next(error.error.message);
+            this.toastr.error(error.error.message);
           },
         });
     }
@@ -228,7 +226,7 @@ export class GeneralPasswordsComponent implements OnInit, OnDestroy {
           this.generalPasswordDataStorageService.encryptedGeneralPasswords.filter(
             (element: GeneralPassword) => element._id !== id
           );
-        this.alertService.successAlertEvent.next('Deleted Successfully!');
+        this.toastr.success('Deleted Successfully!');
 
         if (this.generalPasswords.length === 1 && this.currentPage !== 1) {
           this.router.navigate(['/general-passwords'], {
@@ -246,7 +244,7 @@ export class GeneralPasswordsComponent implements OnInit, OnDestroy {
           this.authService.logout();
           return;
         }
-        this.alertService.failureAlertEvent.next(error.error.message);
+        this.toastr.error(error.error.message);
       },
     });
   }
@@ -271,6 +269,5 @@ export class GeneralPasswordsComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.generalPasswords = null;
     clearTimeout(this.searchTimer);
-    this.alertService.resetAlertEvent.next();
   }
 }

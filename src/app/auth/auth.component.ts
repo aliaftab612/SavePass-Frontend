@@ -1,6 +1,5 @@
 import { Component, OnDestroy } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { AlertService } from '../alert/alert.service';
 import { AuthService } from './auth.service';
 import { Subscription } from 'rxjs';
 import {
@@ -24,10 +23,7 @@ export class AuthComponent implements OnDestroy {
   passwordHiddenImg: IconDefinition = faEye;
   hidePassword: boolean = true;
 
-  constructor(
-    private authService: AuthService,
-    private alertService: AlertService
-  ) {}
+  constructor(private authService: AuthService) {}
   ngOnDestroy(): void {
     if (this.isAuthenticationFailedSubscription) {
       this.isAuthenticationFailedSubscription.unsubscribe();
@@ -41,7 +37,6 @@ export class AuthComponent implements OnDestroy {
   }
 
   SwitchAuthMode(form: NgForm) {
-    this.alertService.resetAlertEvent.next();
     form.reset();
     this.passwordHiddenImg = faEye;
     this.hidePassword = true;

@@ -11,8 +11,6 @@ import { EditGeneralPasswordComponent } from './general-passwords/edit-general-p
 import { FormsModule } from '@angular/forms';
 import { AuthComponent } from './auth/auth.component';
 import { NotFoundComponent } from './not-found/not-found.component';
-import { AlertService } from './alert/alert.service';
-import { AlertComponent } from './alert/alert.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { CookieService } from 'ngx-cookie-service';
 import { AuthService } from './auth/auth.service';
@@ -39,7 +37,6 @@ export function initializeUserData(
     EditGeneralPasswordComponent,
     AuthComponent,
     NotFoundComponent,
-    AlertComponent,
     UpdateProfileComponent,
     LockComponent,
     UpdateLockTimeComponent,
@@ -56,7 +53,6 @@ export function initializeUserData(
     BrowserAnimationsModule,
   ],
   providers: [
-    AlertService,
     CookieService,
     {
       provide: APP_INITIALIZER,
@@ -65,8 +61,6 @@ export function initializeUserData(
       multi: true,
     },
     provideToastr({
-      preventDuplicates: true,
-      resetTimeoutOnDuplicate: true,
       closeButton: true,
     }),
   ],

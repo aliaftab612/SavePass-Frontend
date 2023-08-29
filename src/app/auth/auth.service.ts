@@ -2,7 +2,6 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subject, Subscription } from 'rxjs';
-import { AlertService } from '../alert/alert.service';
 import { User } from './user.model';
 import { environment } from 'src/environments/environment';
 import {
@@ -16,6 +15,7 @@ import { Location } from '@angular/common';
 import { CryptoHelper } from '../shared/crypto-helper';
 import { UserIdleService } from 'angular-user-idle';
 import { DEFAULT_HASH_ITERATIONS } from './auth-defaults.enum';
+import { ToastrService } from 'ngx-toastr';
 
 @Injectable({
   providedIn: 'root',
@@ -34,14 +34,15 @@ export class AuthService {
   private onTimerStartSubscription: Subscription;
   private onTimeoutSubscription: Subscription;
   private hashIterations: number = null;
+  private lockTimeUpdateInProgress: boolean = false;
 
   constructor(
     private http: HttpClient,
-    private alertService: AlertService,
     private router: Router,
     private _location: Location,
     private userIdle: UserIdleService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private toastr: ToastrService
   ) {}
 
   autoLogin = new Observable((subscriber) => {
@@ -107,7 +108,7 @@ export class AuthService {
           );
         },
         error: (error) => {
-          this.alertService.failureAlertEvent.next(error.error.message);
+          this.toastr.error(error.error.message);
           this.isAuthenticationFailed.next(true);
         },
       });
@@ -184,7 +185,7 @@ export class AuthService {
         this._location.back();
       } else {
         this.isUnlockEventStarted.next(false);
-        this.alertService.failureAlertEvent.next('Wrong Password!');
+        this.toastr.error('Wrong Password!');
       }
     } else {
       this.encryptionKey = data.encryptionKey;
@@ -224,7 +225,7 @@ export class AuthService {
           this.hashIterations = null;
           this.localAuthorizationHash = null;
           sessionStorage.clear();
-          this.alertService.failureAlertEvent.next(error.error.message);
+          this.toastr.error(error.error.message);
           this.isAuthenticationFailed.next(true);
         },
       });
@@ -264,9 +265,7 @@ export class AuthService {
             this._location.back();
           }
           this.isProfileUpdateEventStarted.next(false);
-          this.alertService.successAlertEvent.next(
-            'Profile Updated Successfully!'
-          );
+          this.toastr.success('Profile Updated Successfully!');
         },
         error: (error) => {
           if (error.status == 401) {
@@ -274,7 +273,7 @@ export class AuthService {
             return;
           }
           this.isProfileUpdateEventStarted.next(false);
-          this.alertService.failureAlertEvent.next(error.error.message);
+          this.toastr.error(error.error.message);
         },
       });
   }
@@ -293,7 +292,7 @@ export class AuthService {
           : this.router.navigate(['general-passwords']);
       },
       error: (error) => {
-        this.alertService.failureAlertEvent.next(error.error.message);
+        this.toastr.error(error.error.message);
       },
     });
   }
@@ -321,7 +320,7 @@ export class AuthService {
           this.isLockedEvent.next(false);
         },
         error: (error) => {
-          this.alertService.failureAlertEvent.next(error.error.message);
+          this.toastr.error(error.error.message);
         },
       });
   }
@@ -351,6 +350,8 @@ export class AuthService {
   }
 
   updateInactivityLockTime(updatedTime: number): void {
+    if (this.lockTimeUpdateInProgress) return;
+    this.lockTimeUpdateInProgress = true;
     this.stopInactivityLockTimer();
 
     this.http
@@ -367,14 +368,17 @@ export class AuthService {
             data.data.appLockoutMinutes;
           this.startInactivityLockTimer();
           this._location.back();
+          this.lockTimeUpdateInProgress = false;
+          this.toastr.success('Update Lock Time Successfully!');
         },
         error: (error) => {
           this.startInactivityLockTimer();
+          this.lockTimeUpdateInProgress = false;
           if (error.status == 401) {
             this.logout();
             return;
           }
-          this.alertService.failureAlertEvent.next(error.error.message);
+          this.toastr.error(error.error.message);
         },
       });
   }
