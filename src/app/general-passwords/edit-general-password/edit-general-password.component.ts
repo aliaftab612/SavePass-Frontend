@@ -116,6 +116,8 @@ export class EditGeneralPasswordComponent implements OnInit, OnDestroy {
 
   saveGeneralPassword(form: NgForm) {
     if (form.valid === true) {
+      if (this.savingInProgress) return;
+
       this.savingInProgress = true;
       const generalPassword = new GeneralPassword(
         null,
