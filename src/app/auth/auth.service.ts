@@ -34,7 +34,7 @@ export class AuthService {
   private onTimerStartSubscription: Subscription;
   private onTimeoutSubscription: Subscription;
   private hashIterations: number = null;
-  private lockTimeUpdateInProgress: boolean = false;
+  isLockTimeUpdateInProgress: Subject<boolean> = new Subject<boolean>();
 
   constructor(
     private http: HttpClient,
@@ -349,10 +349,8 @@ export class AuthService {
   }
 
   updateInactivityLockTime(updatedTime: number): void {
-    if (this.lockTimeUpdateInProgress) return;
-    this.lockTimeUpdateInProgress = true;
+    this.isLockTimeUpdateInProgress.next(true);
     this.stopInactivityLockTimer();
-
     this.http
       .patch<UpdateAppLockoutTime>(
         `${environment.serverBaseUrl}/api/v1/user/updateAppLockoutTime`,
@@ -367,12 +365,11 @@ export class AuthService {
             data.data.appLockoutMinutes;
           this.startInactivityLockTimer();
           this._location.back();
-          this.lockTimeUpdateInProgress = false;
           this.toastr.success('Update Lock Time Successfully!');
         },
         error: (error) => {
           this.startInactivityLockTimer();
-          this.lockTimeUpdateInProgress = false;
+          this.isLockTimeUpdateInProgress.next(false);
           if (error.status == 401) {
             this.logout();
             return;
