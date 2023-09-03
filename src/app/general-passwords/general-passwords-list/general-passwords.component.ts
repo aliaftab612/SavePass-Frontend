@@ -220,6 +220,7 @@ export class GeneralPasswordsComponent implements OnInit, OnDestroy {
   }
 
   onDelete(id: string) {
+    this.showLoadingSpinner = true;
     this.generalPasswordDataStorageService.deleteGeneralPassword(id).subscribe({
       complete: () => {
         this.generalPasswordDataStorageService.encryptedGeneralPasswords =
@@ -244,6 +245,7 @@ export class GeneralPasswordsComponent implements OnInit, OnDestroy {
           this.authService.logout();
           return;
         }
+        this.showLoadingSpinner = false;
         this.toastr.error(error.error.message);
       },
     });

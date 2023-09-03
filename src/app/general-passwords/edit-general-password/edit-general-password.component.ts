@@ -139,7 +139,6 @@ export class EditGeneralPasswordComponent implements OnInit, OnDestroy {
                   data.data.generalPassword
                 );
               }
-              this.savingInProgress = false;
               this.router.navigate(['/general-passwords']);
               this.toastr.success('Created Successfully!');
             },
@@ -174,11 +173,11 @@ export class EditGeneralPasswordComponent implements OnInit, OnDestroy {
               this.toastr.success('Updated Successfully!');
             },
             error: (error) => {
-              this.savingInProgress = false;
               if (error.status == 401) {
                 this.authService.logout();
                 return;
               }
+              this.savingInProgress = false;
               this.toastr.error(error.error.message);
             },
           });

@@ -267,11 +267,11 @@ export class AuthService {
           this.toastr.success('Profile Updated Successfully!');
         },
         error: (error) => {
-          this.isProfileUpdateEventStarted.next(false);
           if (error.status == 401) {
             this.logout();
             return;
           }
+          this.isProfileUpdateEventStarted.next(false);
           this.toastr.error(error.error.message);
         },
       });
@@ -301,27 +301,22 @@ export class AuthService {
       .get<LoginSignupResponse>(`${environment.serverBaseUrl}/api/v1/logout`, {
         headers: { Authorization: this.token },
       })
-      .subscribe({
-        complete: () => {
-          this.user = null;
-          this.encryptionKey = null;
-          this.token = null;
-          this.hashIterations = null;
-          this.localAuthorizationHash = null;
-          sessionStorage.clear();
+      .subscribe();
 
-          if (this.onTimeoutSubscription || this.onTimerStartSubscription) {
-            this.stopInactivityLockTimer();
-          }
+    this.user = null;
+    this.encryptionKey = null;
+    this.token = null;
+    this.hashIterations = null;
+    this.localAuthorizationHash = null;
+    sessionStorage.clear();
 
-          this.router.navigate(['auth']);
-          this.isAuthenticatedEvent.next(null);
-          this.isLockedEvent.next(false);
-        },
-        error: (error) => {
-          this.toastr.error(error.error.message);
-        },
-      });
+    if (this.onTimeoutSubscription || this.onTimerStartSubscription) {
+      this.stopInactivityLockTimer();
+    }
+
+    this.router.navigate(['auth']);
+    this.isAuthenticatedEvent.next(null);
+    this.isLockedEvent.next(false);
   }
 
   regenerateEncryptionKeyAndUnlock(password: string, email: string) {
@@ -369,11 +364,11 @@ export class AuthService {
         },
         error: (error) => {
           this.startInactivityLockTimer();
-          this.isLockTimeUpdateInProgress.next(false);
           if (error.status == 401) {
             this.logout();
             return;
           }
+          this.isLockTimeUpdateInProgress.next(false);
           this.toastr.error(error.error.message);
         },
       });
