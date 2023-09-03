@@ -264,15 +264,14 @@ export class AuthService {
           } else {
             this._location.back();
           }
-          this.isProfileUpdateEventStarted.next(false);
           this.toastr.success('Profile Updated Successfully!');
         },
         error: (error) => {
+          this.isProfileUpdateEventStarted.next(false);
           if (error.status == 401) {
             this.logout();
             return;
           }
-          this.isProfileUpdateEventStarted.next(false);
           this.toastr.error(error.error.message);
         },
       });

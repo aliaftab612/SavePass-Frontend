@@ -170,16 +170,15 @@ export class EditGeneralPasswordComponent implements OnInit, OnDestroy {
                   generalPasswordIndex
                 ] = data.data.generalPassword;
               }
-              this.savingInProgress = false;
               this._location.back();
               this.toastr.success('Updated Successfully!');
             },
             error: (error) => {
+              this.savingInProgress = false;
               if (error.status == 401) {
                 this.authService.logout();
                 return;
               }
-              this.savingInProgress = false;
               this.toastr.error(error.error.message);
             },
           });
