@@ -360,7 +360,7 @@ export class AuthService {
             data.data.appLockoutMinutes;
           this.startInactivityLockTimer();
           this._location.back();
-          this.toastr.success('Update Lock Time Successfully!');
+          this.toastr.success('Updated Lock Time Successfully!');
         },
         error: (error) => {
           this.startInactivityLockTimer();
