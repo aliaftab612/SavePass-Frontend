@@ -1,3 +1,3 @@
 export const environment = {
-  serverBaseUrl: '',
+  serverBaseUrl: 'https://api-savepass.onrender.com',
 };
