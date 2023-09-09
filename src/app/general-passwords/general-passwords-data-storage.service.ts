@@ -106,7 +106,8 @@ export class GeneralPasswordsDataStorageService {
   ): { generalPasswords: GeneralPassword[]; totalPages: number } {
     let generalPasswordsResult = decryptedGeneralPasswords.filter(
       (element) =>
-        element.website.includes(search) || element.username.includes(search)
+        element.website.toLowerCase().includes(search) ||
+        element.username.toLowerCase().includes(search)
     );
 
     const limit = 10;

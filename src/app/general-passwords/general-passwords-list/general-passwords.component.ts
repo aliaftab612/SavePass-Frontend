@@ -136,7 +136,7 @@ export class GeneralPasswordsComponent implements OnInit, OnDestroy {
             this.generalPasswordDataStorageService.searchAndPaginateGeneralPasswords(
               decryptedGeneralPasswords,
               this.currentPage,
-              this.searchText
+              this.searchText?.trim().toLowerCase()
             );
 
           this.totalPages = filteredGeneralPasswordsObj.totalPages;
@@ -160,7 +160,7 @@ export class GeneralPasswordsComponent implements OnInit, OnDestroy {
         this.generalPasswordDataStorageService.searchAndPaginateGeneralPasswords(
           decryptedGeneralPasswords,
           this.currentPage,
-          this.searchText
+          this.searchText?.trim().toLowerCase()
         );
       this.totalPages = filteredGeneralPasswordsObj.totalPages;
       this.generalPasswords = filteredGeneralPasswordsObj.generalPasswords;
