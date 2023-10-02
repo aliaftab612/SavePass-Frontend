@@ -20,6 +20,7 @@ import { LockComponent } from './lock/lock.component';
 import { UpdateLockTimeComponent } from './update-lock-time/update-lock-time.component';
 import { PasswordStrengthMeterModule } from 'angular-password-strength-meter';
 import { ToastrModule, provideToastr } from 'ngx-toastr';
+import { ModalComponent } from './modal/modal.component';
 
 export function initializeUserData(
   authService: AuthService
@@ -40,6 +41,7 @@ export function initializeUserData(
     UpdateProfileComponent,
     LockComponent,
     UpdateLockTimeComponent,
+    ModalComponent,
   ],
   imports: [
     BrowserModule,

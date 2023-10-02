@@ -39,3 +39,8 @@ interface AuthenticationHashedKeys {
   loginHash: string;
   localLoginHash: string;
 }
+
+interface ModalOutput {
+  action: boolean;
+  data?: any;
+}

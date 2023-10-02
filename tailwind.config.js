@@ -11,6 +11,8 @@ module.exports = {
     "src/index.html",
     "src/app/lock/lock.component.html",
     "src/app/update-lock-time/update-lock-time.component.html",
+    "src/app/modal/modal.component.html",
+    "src/app/modal/modal.component.css",
   ],
   theme: {
     extend: {},

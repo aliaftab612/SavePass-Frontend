@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 import { User } from '../auth/user.model';
 import { GeneralPassword } from './general-password.model';
@@ -12,6 +12,7 @@ import { CryptoHelper } from '../shared/crypto-helper';
 export class GeneralPasswordsDataStorageService {
   generalPasswordsWorker: Worker = null;
   encryptedGeneralPasswords: GeneralPassword[] = null;
+  encryptedGeneralPasswordsChangedEvent: Subject<void> = new Subject();
 
   constructor(private http: HttpClient, private authService: AuthService) {
     this.authService.isAuthenticatedEvent.subscribe((userData: User) => {

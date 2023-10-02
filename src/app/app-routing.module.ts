@@ -2,7 +2,6 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AuthComponent } from './auth/auth.component';
 import { AuthGuard } from './auth/auth.guard';
-import { EditGeneralPasswordComponent } from './general-passwords/edit-general-password/edit-general-password.component';
 import { GeneralPasswordsComponent } from './general-passwords/general-passwords-list/general-passwords.component';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { UpdateProfileComponent } from './update-profile/update-profile.component';
@@ -21,16 +20,6 @@ const routes: Routes = [
   {
     path: 'general-passwords',
     component: GeneralPasswordsComponent,
-    canActivate: [AuthGuard, LockGuard],
-  },
-  {
-    path: 'general-passwords/:id/edit',
-    component: EditGeneralPasswordComponent,
-    canActivate: [AuthGuard, LockGuard],
-  },
-  {
-    path: 'general-passwords/new',
-    component: EditGeneralPasswordComponent,
     canActivate: [AuthGuard, LockGuard],
   },
   {

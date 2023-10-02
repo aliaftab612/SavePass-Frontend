@@ -11,14 +11,17 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { AuthService } from 'src/app/auth/auth.service';
-import { GeneralPasswordsResponse } from 'index';
+import { GeneralPasswordsResponse, ModalOutput } from 'index';
 import { CryptoHelper } from 'src/app/shared/crypto-helper';
 import { ToastrService } from 'ngx-toastr';
+import { ModalService } from 'src/app/modal/modal.service';
+import { EditGeneralPasswordComponent } from '../edit-general-password/edit-general-password.component';
 
 @Component({
   selector: 'app-general-passwords',
   templateUrl: './general-passwords.component.html',
   styleUrls: ['./general-passwords.component.css'],
+  providers: [ModalService],
 })
 export class GeneralPasswordsComponent implements OnInit, OnDestroy {
   generalPasswords: GeneralPassword[] = [];
@@ -37,8 +40,21 @@ export class GeneralPasswordsComponent implements OnInit, OnDestroy {
     private router: Router,
     private authService: AuthService,
     private route: ActivatedRoute,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private modalService: ModalService
   ) {}
+
+  AddOrEditGeneralPassword(generalPassword?: GeneralPassword) {
+    this.modalService.open(EditGeneralPasswordComponent, {
+      size: 'lg',
+      title: generalPassword
+        ? 'Edit General Password'
+        : 'Add New General Password',
+      submitButtonName: 'Save',
+      closeButtonName: 'Close',
+      data: { generalPassword },
+    });
+  }
 
   ngOnInit(): void {
     this.route.queryParams.subscribe({
@@ -64,6 +80,12 @@ export class GeneralPasswordsComponent implements OnInit, OnDestroy {
         this.populateGeneralPasswords();
       },
     });
+
+    this.generalPasswordDataStorageService.encryptedGeneralPasswordsChangedEvent.subscribe(
+      () => {
+        this.populateGeneralPasswords();
+      }
+    );
   }
 
   searchTextChanged(searchGeneralPasswordsElememt: HTMLInputElement) {
@@ -249,14 +271,6 @@ export class GeneralPasswordsComponent implements OnInit, OnDestroy {
         this.toastr.error(error.error.message);
       },
     });
-  }
-
-  addNewGeneralPassword() {
-    this.router.navigate(['/general-passwords', 'new']);
-  }
-
-  onEdit(id: string) {
-    this.router.navigate(['/general-passwords', id, 'edit']);
   }
 
   navigateToPage(page: number) {
