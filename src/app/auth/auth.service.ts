@@ -86,6 +86,10 @@ export class AuthService {
     localAuthorization: boolean,
     isSignUp: boolean = false
   ) {
+    clearTimeout(this.twoFactorSessionTimeout);
+    this.tempEmail = null;
+    this.tempLoginHash = null;
+
     if (isSignUp) {
       this.hashIterations = DEFAULT_HASH_ITERATIONS;
       sessionStorage.setItem(
@@ -293,7 +297,7 @@ export class AuthService {
     this.router.navigate(['2fa']);
     this.twoFactorSessionTimeout = setTimeout(() => {
       this.removeSensitiveInfoWhenAuthFails();
-    }, 30000);
+    }, 2 * 60 * 1000);
   }
 
   private removeSensitiveInfoWhenAuthFails() {

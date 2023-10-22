@@ -27,6 +27,7 @@ export class ModalService {
       data?: any;
       submitButtonName?: string;
       closeButtonName?: string;
+      submitEnabled?: boolean;
     }
   ) {
     const modalComponent = this.viewContainerRef.createComponent(
@@ -50,6 +51,7 @@ export class ModalService {
     modalComponent.instance.size = options?.size;
     modalComponent.instance.title = options?.title;
     modalComponent.instance.submitButtonName = options?.submitButtonName;
+    modalComponent.instance.submitEnabled = options?.submitEnabled ?? true;
     modalComponent.instance.closeButtonName = options?.closeButtonName;
     modalComponent.instance.closeEvent.subscribe((modalOutput: ModalOutput) =>
       this.modalSubmitedOrClosed(modalOutput)

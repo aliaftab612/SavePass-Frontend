@@ -8,11 +8,11 @@ import {
 import { ModalOutput } from 'index';
 import { ModalContent } from 'src/app/modal/modal-content.interface';
 import { ModalComponent } from 'src/app/modal/modal.component';
-import qrcode from 'qrcode';
 import { AuthService } from 'src/app/auth/auth.service';
 import { NgForm } from '@angular/forms';
 import { TotpAuthenticationSetupService } from './totp-authenticator-setup.service';
 import { ToastrService } from 'ngx-toastr';
+import { IconDefinition, faSpinner } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-totp-authentication-setup',
@@ -26,6 +26,11 @@ export class TotpAuthenticationSetupComponent
   modalData: any;
   modalComponentRef: ComponentRef<ModalComponent>;
   formSubmitted = false;
+  secret: string;
+  isAuthenticatorEnabled: boolean;
+  spinnerIcon: IconDefinition = faSpinner;
+  getAuthenticatorInProgress = true;
+  secretQrCode: string;
 
   constructor(
     private authService: AuthService,
@@ -34,19 +39,42 @@ export class TotpAuthenticationSetupComponent
   ) {}
 
   ngOnInit(): void {
-    qrcode.toCanvas(
-      document.querySelector('.totp-qr'),
-      `otpauth://totp/SavePass:${this.authService.getUser().email}?secret=${
-        this.modalData.secret
-      }&issuer=SavePass`
-    );
+    this.getAuthenticator();
+  }
+
+  getAuthenticator() {
+    this.totpAuthSetupService
+      .getAuthenticator(this.modalData.loginHash)
+      .subscribe({
+        next: (data) => {
+          this.secret = data.data.secret;
+          this.isAuthenticatorEnabled = data.data.enabled;
+          this.getAuthenticatorInProgress = false;
+          this.secretQrCode = `otpauth://totp/SavePass:${
+            this.authService.getUser().email
+          }?secret=${this.secret}&issuer=SavePass`;
+
+          this.modalComponentRef.instance.submitButtonName = this
+            .isAuthenticatorEnabled
+            ? 'Disable'
+            : 'Enable';
+          this.modalComponentRef.instance.submitEnabled = true;
+        },
+        error: (err) => {
+          if (err.status == 401) {
+            this.authService.logout();
+            return;
+          }
+          this.toastr.error(err.error.message);
+        },
+      });
   }
 
   async submit(): Promise<ModalOutput> {
     this.formSubmitted = true;
 
     if (this.form.valid) {
-      if (this.modalData.isAuthenticatorEnabled) {
+      if (this.isAuthenticatorEnabled) {
         try {
           const status = await this.disableAuthenticator();
           return { action: true, data: { authenticatorAppEnabled: status } };
@@ -90,11 +118,7 @@ export class TotpAuthenticationSetupComponent
   enableAuthenticator(token: string) {
     return new Promise((resolve, reject) => {
       this.totpAuthSetupService
-        .enableAuthenticator(
-          this.modalData.loginHash,
-          this.modalData.secret,
-          token
-        )
+        .enableAuthenticator(this.modalData.loginHash, this.secret, token)
         .subscribe({
           next: (data) => {
             this.toastr.success('2FA with Authenticator App Enabled!');
@@ -114,5 +138,7 @@ export class TotpAuthenticationSetupComponent
 
   ngOnDestroy(): void {
     this.modalData = null;
+    this.secret = null;
+    this.secretQrCode = null;
   }
 }

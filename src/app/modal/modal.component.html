@@ -62,7 +62,7 @@
           </fa-icon>
         </div>
         <button
-          *ngIf="!submissionInProgress"
+          *ngIf="!submissionInProgress && submitEnabled"
           data-modal-hide="defaultModal"
           type="button"
           (click)="submit()"

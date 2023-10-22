@@ -26,6 +26,7 @@ import { TwoFactorComponent } from './settings/two-factor/two-factor.component';
 import { VerifyMasterPasswordComponent } from './verify-master-password/verify-master-password.component';
 import { TotpAuthenticationSetupComponent } from './settings/two-factor/totp-authentication-setup/totp-authentication-setup.component';
 import { TwoFactorAuthComponent } from './auth/two-factor-auth/two-factor-auth.component';
+import { QRCodeModule } from 'angularx-qrcode';
 
 export function initializeUserData(
   authService: AuthService
@@ -63,6 +64,7 @@ export function initializeUserData(
     PasswordStrengthMeterModule.forRoot(),
     ToastrModule.forRoot(),
     BrowserAnimationsModule,
+    QRCodeModule,
   ],
   providers: [
     CookieService,

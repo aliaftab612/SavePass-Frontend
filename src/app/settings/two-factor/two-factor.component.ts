@@ -15,7 +15,6 @@ import { ModalService } from 'src/app/modal/modal.service';
 import { VerifyMasterPasswordComponent } from 'src/app/verify-master-password/verify-master-password.component';
 import { environment } from 'src/environments/environment';
 import { TotpAuthenticationSetupComponent } from './totp-authentication-setup/totp-authentication-setup.component';
-import { TotpAuthenticationSetupService } from './totp-authentication-setup/totp-authenticator-setup.service';
 
 @Component({
   selector: 'app-two-factor',
@@ -35,8 +34,7 @@ export class TwoFactorComponent implements OnInit {
     private http: HttpClient,
     private authService: AuthService,
     private toastr: ToastrService,
-    private modalService: ModalService,
-    private totpAuthSetupService: TotpAuthenticationSetupService
+    private modalService: ModalService
   ) {}
 
   ngOnInit(): void {
@@ -72,38 +70,21 @@ export class TwoFactorComponent implements OnInit {
       .subscribe({
         next: (modalData) => {
           if (modalData.action) {
-            this.totpAuthSetupService
-              .getAuthenticator(modalData.data)
-              .subscribe({
-                next: (data) => {
-                  this.modalService
-                    .open(TotpAuthenticationSetupComponent, {
-                      size: 'lg',
-                      title: 'Two Factor Authentication (Authenticator App)',
-                      submitButtonName: data.data.enabled
-                        ? 'Disable'
-                        : 'Enable',
-                      closeButtonName: 'Close',
-                      data: {
-                        loginHash: modalData.data,
-                        isAuthenticatorEnabled: data.data.enabled,
-                        secret: data.data.secret,
-                      },
-                    })
-                    .subscribe({
-                      next: (modalData) => {
-                        if (modalData.action) {
-                          this.twoFactorProvidersEnabledStatus = modalData.data;
-                        }
-                      },
-                    });
+            this.modalService
+              .open(TotpAuthenticationSetupComponent, {
+                size: 'lg',
+                title: 'Two Factor Authentication (Authenticator App)',
+                closeButtonName: 'Close',
+                submitEnabled: false,
+                data: {
+                  loginHash: modalData.data,
                 },
-                error: (err) => {
-                  if (err.status == 401) {
-                    this.authService.logout();
-                    return;
+              })
+              .subscribe({
+                next: (modalData) => {
+                  if (modalData.action) {
+                    this.twoFactorProvidersEnabledStatus = modalData.data;
                   }
-                  this.toastr.error(err.error.message);
                 },
               });
           }

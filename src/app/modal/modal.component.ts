@@ -26,6 +26,7 @@ export class ModalComponent implements AfterViewInit {
   @Input() title? = 'Modal title';
   @Input() submitButtonName? = 'Submit';
   @Input() closeButtonName? = 'Close';
+  @Input() submitEnabled? = true;
 
   dynamicComponentHostView: ViewRef;
   dynamicComponentInstance: any;
