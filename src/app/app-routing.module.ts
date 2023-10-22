@@ -9,23 +9,43 @@ import { LockComponent } from './lock/lock.component';
 import { LockGuard } from './lock/lock.guard';
 import { LoginGuard } from './auth/login.guard';
 import { UpdateLockTimeComponent } from './update-lock-time/update-lock-time.component';
+import { SettingsComponent } from './settings/settings.component';
+import { TwoFactorComponent } from './settings/two-factor/two-factor.component';
+import { TwoFactorAuthComponent } from './auth/two-factor-auth/two-factor-auth.component';
+import { TwoFactorAuthGuard } from './auth/two-factor-auth/two-factor-auth.guard';
 
 const routes: Routes = [
   { path: 'auth', component: AuthComponent, canActivate: [LoginGuard] },
-  {
-    path: 'update-profile',
-    component: UpdateProfileComponent,
-    canActivate: [AuthGuard, LockGuard],
-  },
+
   {
     path: 'general-passwords',
     component: GeneralPasswordsComponent,
     canActivate: [AuthGuard, LockGuard],
   },
   {
-    path: 'update-lock-time',
-    component: UpdateLockTimeComponent,
+    path: '2fa',
+    component: TwoFactorAuthComponent,
+    canActivate: [TwoFactorAuthGuard],
+  },
+  {
+    path: 'settings',
+    component: SettingsComponent,
     canActivate: [AuthGuard, LockGuard],
+    children: [
+      { path: '', redirectTo: 'update-profile', pathMatch: 'full' },
+      {
+        path: 'update-lock-time',
+        component: UpdateLockTimeComponent,
+      },
+      {
+        path: 'update-profile',
+        component: UpdateProfileComponent,
+      },
+      {
+        path: 'two-factor',
+        component: TwoFactorComponent,
+      },
+    ],
   },
   {
     path: 'lock',

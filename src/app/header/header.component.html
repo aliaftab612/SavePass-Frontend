@@ -164,14 +164,8 @@
             <a
               class="dropdown-item dark:text-white dark:hover:bg-slate-800"
               style="cursor: pointer"
-              (click)="updateProfile()"
-              >Update Profile</a
-            >
-            <a
-              class="dropdown-item dark:text-white dark:hover:bg-slate-800"
-              style="cursor: pointer"
-              (click)="updateLockTime()"
-              >Update Lock Time</a
+              (click)="openSettings()"
+              >Account Settings</a
             >
             <a
               class="dropdown-item dark:text-white dark:hover:bg-slate-800"
@@ -286,17 +280,10 @@
           <div class="ml-3 mt-2 flex flex-row flex-wrap">
             <button
               type="button"
-              (click)="updateProfile()"
+              (click)="openSettings()"
               class="mb-2 mr-2 rounded-md border border-black px-3 py-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black dark:text-white"
             >
-              Update Profile
-            </button>
-            <button
-              type="button"
-              (click)="updateLockTime()"
-              class="mb-2 mr-2 rounded-md border border-black px-3 py-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black dark:text-white"
-            >
-              Update Lock Time
+              Account Settings
             </button>
             <button
               type="button"

@@ -66,7 +66,7 @@ export class ModalService {
     return this.modalNotifier?.asObservable();
   }
 
-  modalSubmitedOrClosed(modalOutput: ModalOutput) {
+  private modalSubmitedOrClosed(modalOutput: ModalOutput) {
     this.document.body.style.removeProperty('overflow');
     this.modalNotifier?.next(modalOutput);
   }

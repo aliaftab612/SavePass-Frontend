@@ -1,0 +1,43 @@
+<section>
+  <div
+    class="flex items-center justify-center pb-10 sm:px-6 sm:pb-16 lg:px-8 lg:pb-24"
+  >
+    <div
+      class="flex flex-col items-center justify-center gap-5 xl:mx-auto xl:w-full xl:max-w-sm 2xl:max-w-md"
+    >
+      <h2 class="text-center text-2xl font-bold leading-tight dark:text-white">
+        Two-Step Login
+      </h2>
+      <fa-icon
+        *ngIf="!twoFactorProvidersEnabledStatus"
+        class="text-slate-900 dark:text-sky-500"
+        [icon]="spinnerIcon"
+        [spin]="true"
+        size="2xl"
+      >
+      </fa-icon>
+      <div
+        *ngIf="twoFactorProvidersEnabledStatus"
+        class="flex w-full items-center justify-between gap-4 rounded-md border border-gray-300 bg-transparent px-3 py-2 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:opacity-50"
+      >
+        <div class="flex items-center justify-center">
+          <div class="dark:text-white">Authenticator App</div>
+          <div
+            *ngIf="twoFactorProvidersEnabledStatus.authenticatorAppEnabled"
+            class="flex items-center justify-center px-2 py-2.5"
+          >
+            <fa-icon class="text-green-500" [icon]="checkIcon" size="xl">
+            </fa-icon>
+          </div>
+        </div>
+        <button
+          type="button"
+          (click)="manageAuthenticatorAppSetup()"
+          class="cursor-not-allowed rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black dark:bg-sky-500 dark:hover:bg-sky-500/80"
+        >
+          Manage
+        </button>
+      </div>
+    </div>
+  </div>
+</section>

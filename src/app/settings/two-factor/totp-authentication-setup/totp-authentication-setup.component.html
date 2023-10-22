@@ -1,0 +1,50 @@
+<form #form="ngForm" (ngSubmit)="modalComponentRef.instance.submit()">
+  <div class="space-y-5">
+    <div class="flex flex-col items-center justify-center gap-3">
+      <div class="text-lg font-bold text-gray-900 dark:text-gray-200">
+        Scan this QR code with your authenticator app
+      </div>
+      <canvas class="totp-qr"></canvas>
+      <div class="text-base font-medium text-pink-400">
+        {{ modalData.secret }}
+      </div>
+    </div>
+    <div *ngIf="!modalData.isAuthenticatorEnabled">
+      <div class="flex items-center justify-between">
+        <label
+          for="token"
+          class="text-base font-medium text-gray-900 dark:text-gray-200"
+        >
+          Enter the resulting 6 digit verification code from the app
+        </label>
+      </div>
+      <div class="mt-2">
+        <div class="flex flex-row">
+          <input
+            class="flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 dark:text-white"
+            id="token"
+            required
+            minlength="6"
+            maxlength="6"
+            ngModel
+            name="token"
+            #token="ngModel"
+          />
+        </div>
+      </div>
+      <div
+        *ngIf="token.errors?.['required'] && (token.touched || formSubmitted)"
+        style="color: red"
+      >
+        * This field is required.
+      </div>
+      <div
+        *ngIf="token.errors?.['minlength'] && (token.touched || formSubmitted)"
+        style="color: red"
+      >
+        * Verification code should be 6 digits long.
+      </div>
+    </div>
+    <input type="submit" class="hidden" />
+  </div>
+</form>

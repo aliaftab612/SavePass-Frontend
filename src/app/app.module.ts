@@ -21,6 +21,11 @@ import { UpdateLockTimeComponent } from './update-lock-time/update-lock-time.com
 import { PasswordStrengthMeterModule } from 'angular-password-strength-meter';
 import { ToastrModule, provideToastr } from 'ngx-toastr';
 import { ModalComponent } from './modal/modal.component';
+import { SettingsComponent } from './settings/settings.component';
+import { TwoFactorComponent } from './settings/two-factor/two-factor.component';
+import { VerifyMasterPasswordComponent } from './verify-master-password/verify-master-password.component';
+import { TotpAuthenticationSetupComponent } from './settings/two-factor/totp-authentication-setup/totp-authentication-setup.component';
+import { TwoFactorAuthComponent } from './auth/two-factor-auth/two-factor-auth.component';
 
 export function initializeUserData(
   authService: AuthService
@@ -42,6 +47,11 @@ export function initializeUserData(
     LockComponent,
     UpdateLockTimeComponent,
     ModalComponent,
+    SettingsComponent,
+    TwoFactorComponent,
+    VerifyMasterPasswordComponent,
+    TotpAuthenticationSetupComponent,
+    TwoFactorAuthComponent,
   ],
   imports: [
     BrowserModule,

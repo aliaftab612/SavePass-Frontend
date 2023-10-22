@@ -19,6 +19,15 @@ interface GeneralPasswordsResponse {
   data: { generalPasswords: GeneralPassword[] };
 }
 
+interface TwoFactorProvidersEnabledStatus {
+  authenticatorAppEnabled: boolean;
+}
+
+interface TwoFactorProvidersEnabledStatusResponse {
+  status: string;
+  data: TwoFactorProvidersEnabledStatus;
+}
+
 interface UpdateAppLockoutTime {
   status: string;
   data: { appLockoutMinutes: number };
@@ -32,6 +41,21 @@ interface GeneralPasswordResponse {
 interface PreLoginResponse {
   status: string;
   data: { hashIterations: number };
+}
+
+interface GetOrEnableAuthenticatorResponse {
+  status: string;
+  data: {
+    enabled: boolean;
+    secret: string;
+  };
+}
+
+interface DisableAuthenticatorResponse {
+  status: string;
+  data: {
+    enabled: boolean;
+  };
 }
 
 interface AuthenticationHashedKeys {

@@ -43,13 +43,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.authService.lock();
   }
 
-  updateLockTime() {
-    this.router.navigate(['update-lock-time']);
-    this.mobileViewHamburgerClose();
-  }
-
-  updateProfile() {
-    this.router.navigate(['update-profile']);
+  openSettings() {
+    this.router.navigate(['settings']);
     this.mobileViewHamburgerClose();
   }
 

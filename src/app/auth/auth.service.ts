@@ -14,7 +14,11 @@ import {
 import { Location } from '@angular/common';
 import { CryptoHelper } from '../shared/crypto-helper';
 import { UserIdleService } from 'angular-user-idle';
-import { DEFAULT_HASH_ITERATIONS } from './auth-defaults.enum';
+import {
+  DEFAULT_HASH_ITERATIONS,
+  TwoFactorProviders,
+  errTypes,
+} from './auth-defaults.enum';
 import { ToastrService } from 'ngx-toastr';
 
 @Injectable({
@@ -35,6 +39,9 @@ export class AuthService {
   private onTimeoutSubscription: Subscription;
   private hashIterations: number = null;
   isLockTimeUpdateInProgress: Subject<boolean> = new Subject<boolean>();
+  private tempEmail: string = null;
+  private tempLoginHash: string = null;
+  private twoFactorSessionTimeout: NodeJS.Timeout = null;
 
   constructor(
     private http: HttpClient,
@@ -201,34 +208,103 @@ export class AuthService {
   private sendAuthenticationRequest(
     email: string,
     loginHash: string,
-    isSignUp = false
+    isSignUp = false,
+    twoFactorProvider?: TwoFactorProviders,
+    twoFactorVerificationCode?: string,
+    isTwoFactorAuth = false
   ) {
+    const authRequestBody: any = {
+      email,
+      password: loginHash,
+      hashIterations: this.hashIterations,
+    };
+
+    if (twoFactorProvider && twoFactorVerificationCode) {
+      authRequestBody.twoFactorProvider = twoFactorProvider;
+      authRequestBody.twoFactorVerificationCode = twoFactorVerificationCode;
+    }
+
     this.http
       .post<LoginSignupResponse>(
         `${environment.serverBaseUrl}/api/v1/${isSignUp ? 'signup' : 'login'}`,
-        {
-          email,
-          password: loginHash,
-          hashIterations: this.hashIterations,
-        }
+        authRequestBody
       )
       .subscribe({
         next: (data: LoginSignupResponse) => {
+          this.tempEmail = null;
+          this.tempLoginHash = null;
+          clearTimeout(this.twoFactorSessionTimeout);
+
           this.token = 'Bearer ' + data.token;
           sessionStorage.setItem('token', data.token);
           this.initAppAfterAuthentication(isSignUp);
         },
         error: (error) => {
-          this.user = null;
-          this.encryptionKey = null;
-          this.token = null;
-          this.hashIterations = null;
-          this.localAuthorizationHash = null;
-          sessionStorage.clear();
-          this.toastr.error(error.error.message);
+          if (error.error.errType === errTypes.twoFactorRequired) {
+            return this.setTempAuthInfoAndNavigateTo2faAuth(loginHash, email);
+          }
+
+          if (!isTwoFactorAuth) {
+            this.removeSensitiveInfoWhenAuthFails();
+          }
           this.isAuthenticationFailed.next(true);
+          this.toastr.error(error.error.message);
         },
       });
+  }
+
+  canceltwoFactorAuthentication() {
+    clearTimeout(this.twoFactorSessionTimeout);
+    this.removeSensitiveInfoWhenAuthFails();
+    this.router.navigate(['auth']);
+  }
+
+  canNavigateFor2fa(): boolean {
+    return this.tempEmail !== null && this.tempLoginHash !== null;
+  }
+
+  twoFactorAuthentication(
+    twoFactorProvider: TwoFactorProviders,
+    twoFactorVerificationCode: string
+  ) {
+    if (this.tempEmail === null && this.tempLoginHash === null) {
+      this.isAuthenticationFailed.next(true);
+      this.toastr.error(
+        'Your session has timed out. Please go back and try logging in again.'
+      );
+      return;
+    }
+    this.sendAuthenticationRequest(
+      this.tempEmail,
+      this.tempLoginHash,
+      false,
+      twoFactorProvider,
+      twoFactorVerificationCode,
+      true
+    );
+  }
+
+  private setTempAuthInfoAndNavigateTo2faAuth(
+    loginHash: string,
+    email: string
+  ) {
+    this.tempEmail = email;
+    this.tempLoginHash = loginHash;
+    this.router.navigate(['2fa']);
+    this.twoFactorSessionTimeout = setTimeout(() => {
+      this.removeSensitiveInfoWhenAuthFails();
+    }, 30000);
+  }
+
+  private removeSensitiveInfoWhenAuthFails() {
+    this.tempEmail = null;
+    this.tempLoginHash = null;
+    this.user = null;
+    this.encryptionKey = null;
+    this.token = null;
+    this.hashIterations = null;
+    this.localAuthorizationHash = null;
+    sessionStorage.clear();
   }
 
   getUserData(): Observable<UserDataResponse> {
@@ -240,12 +316,46 @@ export class AuthService {
     );
   }
 
-  updateUserData(
-    firstName: string,
-    lastName: string,
-    profilePhotoUrl: string,
-    isSignUp = false
-  ) {
+  verifyMasterPassword(password: string, email: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      if (typeof Worker !== 'undefined') {
+        if (!this.authWorker) {
+          this.authWorker = new Worker(
+            new URL('./auth.worker', import.meta.url)
+          );
+        }
+
+        this.authWorker.onmessage = ({ data }) => {
+          if (data.keys.localLoginHash === this.localAuthorizationHash) {
+            resolve(data.keys.loginHash);
+          } else {
+            reject();
+          }
+        };
+        this.authWorker.postMessage({
+          password,
+          username: email,
+          iterations: this.hashIterations,
+          localAuthorizationHash: false,
+        });
+      } else {
+        const keys = CryptoHelper.generateEncryptionKeyAndLoginHash(
+          password,
+          email,
+          this.hashIterations,
+          false
+        );
+
+        if (keys.localLoginHash === this.localAuthorizationHash) {
+          resolve(keys.loginHash);
+        } else {
+          reject();
+        }
+      }
+    });
+  }
+
+  updateUserData(firstName: string, lastName: string, profilePhotoUrl: string) {
     this.isProfileUpdateEventStarted.next(true);
     this.http
       .patch<UserDataResponse>(
@@ -259,12 +369,9 @@ export class AuthService {
         next: (userData: UserDataResponse) => {
           this.user = userData.data.user;
           this.isAuthenticatedEvent.next(Object.create(this.user));
-          if (isSignUp) {
-            this.router.navigate(['general-passwords']);
-          } else {
-            this._location.back();
-          }
+
           this.toastr.success('Profile Updated Successfully!');
+          this.isProfileUpdateEventStarted.next(false);
         },
         error: (error) => {
           if (error.status == 401) {
@@ -285,9 +392,7 @@ export class AuthService {
         this.startInactivityLockTimer();
 
         isSignUp
-          ? this.router.navigate(['update-profile'], {
-              queryParams: { issignup: true },
-            })
+          ? this.router.navigate(['settings'])
           : this.router.navigate(['general-passwords']);
       },
       error: (error) => {
@@ -359,8 +464,8 @@ export class AuthService {
           this.user.userSettings.appLockoutMinutes =
             data.data.appLockoutMinutes;
           this.startInactivityLockTimer();
-          this._location.back();
           this.toastr.success('Updated Lock Time Successfully!');
+          this.isLockTimeUpdateInProgress.next(false);
         },
         error: (error) => {
           this.startInactivityLockTimer();

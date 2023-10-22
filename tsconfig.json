@@ -18,6 +18,8 @@
     "moduleResolution": "node",
     "importHelpers": true,
     "target": "ES2022",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "module": "ES2022",
     "useDefineForClassFields": false,
     "strictNullChecks": false,
