@@ -6,96 +6,110 @@
       <h2 class="text-center text-2xl font-bold leading-tight dark:text-white">
         Update Profile
       </h2>
-      <form #form="ngForm" class="mt-8" (ngSubmit)="updateProfile(form)">
-        <div class="space-y-5">
-          <div>
-            <label
-              for="firstName"
-              class="text-base font-medium text-gray-900 dark:text-gray-200"
-            >
-              First Name
-            </label>
-            <div class="mt-2">
-              <input
-                class="flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 dark:text-white"
-                id="firstname"
-                required
-                [ngModel]="user.firstName"
-                name="firstname"
-                #firstname="ngModel"
-              />
-              <div
-                *ngIf="!firstname.valid && firstname.touched"
-                style="color: red"
+      <div class="flex justify-center gap-12">
+        <form #form="ngForm" class="mt-8" (ngSubmit)="updateProfile(form)">
+          <div class="space-y-5">
+            <div>
+              <label
+                for="firstName"
+                class="text-base font-medium text-gray-900 dark:text-gray-200"
               >
-                * This field is required.
+                First Name
+              </label>
+              <div class="mt-2">
+                <input
+                  class="flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 dark:text-white"
+                  id="firstname"
+                  required
+                  [ngModel]="user.firstName"
+                  name="firstname"
+                  #firstname="ngModel"
+                />
+                <div
+                  *ngIf="!firstname.valid && firstname.touched"
+                  style="color: red"
+                >
+                  * This field is required.
+                </div>
               </div>
             </div>
+            <div>
+              <div class="flex items-center justify-between">
+                <label
+                  for="lastName"
+                  class="text-base font-medium text-gray-900 dark:text-gray-200"
+                >
+                  Last Name
+                </label>
+              </div>
+              <div class="mt-2">
+                <input
+                  class="flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 dark:text-white"
+                  id="lastname"
+                  [ngModel]="user.lastName"
+                  name="lastname"
+                  #lastname="ngModel"
+                />
+              </div>
+            </div>
+
+            <div
+              *ngIf="updateInProgress"
+              class="flex items-center justify-center px-3.5 py-2.5"
+            >
+              <fa-icon
+                class="text-slate-900 dark:text-sky-500"
+                [icon]="loadingSpinnerIcon"
+                [spin]="true"
+                size="2xl"
+              >
+              </fa-icon>
+            </div>
+            <div
+              *ngIf="!updateInProgress"
+              class="flex flex-row justify-center gap-3"
+            >
+              <button
+                type="submit"
+                [disabled]="!form.valid"
+                class="cursor-not-allowed rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black dark:bg-sky-500 dark:hover:bg-sky-500/80"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </form>
+        <div class="mt-8 flex flex-shrink-0 flex-col">
+          <div class="text-base font-medium text-gray-900 dark:text-gray-200">
+            Profile Photo
           </div>
           <div>
-            <div class="flex items-center justify-between">
-              <label
-                for="lastName"
-                class="text-base font-medium text-gray-900 dark:text-gray-200"
-              >
-                Last Name
-              </label>
-            </div>
-            <div class="mt-2">
-              <input
-                class="flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 dark:text-white"
-                id="lastname"
-                [ngModel]="user.lastName"
-                name="lastname"
-                #lastname="ngModel"
-              />
-            </div>
-          </div>
-          <div>
-            <div class="flex items-center justify-between">
-              <label
-                for="profilePhotoURL"
-                class="text-base font-medium text-gray-900 dark:text-gray-200"
-              >
-                Profile Photo URL
-              </label>
-            </div>
-            <div class="mt-2">
-              <input
-                class="flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 dark:text-white"
-                id="profilePhotoURL"
-                [ngModel]="user.profilePhotoUrl ? user.profilePhotoUrl : ''"
-                name="profilePhotoURL"
-                #profilePhotoURL="ngModel"
-              />
-            </div>
-          </div>
-          <div
-            *ngIf="updateInProgress"
-            class="flex items-center justify-center px-3.5 py-2.5"
-          >
-            <fa-icon
-              class="text-slate-900 dark:text-sky-500"
-              [icon]="loadingSpinnerIcon"
-              [spin]="true"
-              size="2xl"
+            <div
+              class="mt-2 rounded-full border-2 border-slate-900 dark:border-sky-500"
             >
-            </fa-icon>
-          </div>
-          <div
-            *ngIf="!updateInProgress"
-            class="flex flex-row justify-center gap-3"
-          >
-            <button
-              type="submit"
-              [disabled]="!form.valid"
-              class="cursor-not-allowed rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black dark:bg-sky-500 dark:hover:bg-sky-500/80"
+              <img class="h-40 w-40 rounded-full" [src]="profileImageUrl" />
+            </div>
+            <div
+              (click)="profilePhotoInput.click()"
+              class="relative -top-1/4 left-3/4 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-slate-900 p-3 dark:bg-sky-500"
             >
-              Save
-            </button>
+              <input
+                type="file"
+                class="hidden"
+                accept="image/*"
+                #profilePhotoInput
+                (change)="profilePhotoAttached($event)"
+              />
+              <fa-icon
+                class="text-white"
+                [icon]="profilePhotoEditIcon"
+                size="xl"
+              >
+              </fa-icon>
+            </div>
           </div>
         </div>
-      </form>
+      </div>
     </div>
   </div>
 </section>

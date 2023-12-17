@@ -27,6 +27,7 @@
     "angular-user-idle": "^4.0.0",
     "angularx-qrcode": "^15.0.1",
     "bootstrap": "^5.2.3",
+    "cropperjs": "^1.6.1",
     "crypto-js": "^4.1.1",
     "ngx-cookie-service": "^15.0.0",
     "ngx-toastr": "^16.2.0",

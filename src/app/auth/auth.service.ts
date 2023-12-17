@@ -359,12 +359,12 @@ export class AuthService {
     });
   }
 
-  updateUserData(firstName: string, lastName: string, profilePhotoUrl: string) {
+  updateUserData(firstName: string, lastName: string) {
     this.isProfileUpdateEventStarted.next(true);
     this.http
       .patch<UserDataResponse>(
         `${environment.serverBaseUrl}/api/v1/user`,
-        { firstName, lastName, profilePhotoUrl },
+        { firstName, lastName },
         {
           headers: { Authorization: this.token },
         }
@@ -386,6 +386,10 @@ export class AuthService {
           this.toastr.error(error.error.message);
         },
       });
+  }
+
+  updateUserObject(user: User) {
+    this.user = user;
   }
 
   initAppAfterAuthentication(isSignUp = false) {

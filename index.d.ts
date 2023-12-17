@@ -68,3 +68,8 @@ interface ModalOutput {
   action: boolean;
   data?: any;
 }
+
+interface UpdateProfilePhotoResponse {
+  status: string;
+  data: { profilePhotoUrl: string };
+}

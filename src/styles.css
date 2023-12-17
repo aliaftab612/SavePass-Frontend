@@ -7,3 +7,7 @@
     @apply !border-r-white dark:!border-r-slate-800;
   }
 }
+.cropper-view-box,
+.cropper-face {
+  border-radius: 50%;
+}
