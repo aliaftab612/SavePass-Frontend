@@ -30,7 +30,7 @@ const routes: Routes = [
   {
     path: 'settings',
     component: SettingsComponent,
-    canActivate: [AuthGuard, LockGuard],
+    canActivate: [AuthGuard],
     children: [
       { path: '', redirectTo: 'update-profile', pathMatch: 'full' },
       {
