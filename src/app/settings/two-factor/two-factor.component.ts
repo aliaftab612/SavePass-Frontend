@@ -15,6 +15,11 @@ import { ModalService } from 'src/app/modal/modal.service';
 import { VerifyMasterPasswordComponent } from 'src/app/verify-master-password/verify-master-password.component';
 import { environment } from 'src/environments/environment';
 import { TotpAuthenticationSetupComponent } from './totp-authentication-setup/totp-authentication-setup.component';
+import { PassekysRegistrationSetupComponent } from './passkeys-registration-setup/passekys-registration-setup/passekys-registration-setup.component';
+import { PasswordlessService } from 'passkeys-prf-client';
+import { PasskeyCredential } from 'passkeys-prf-client/dist/types';
+import { handleError } from 'src/app/shared/PassskeyAuthErrorHandler';
+import aaguids from './../../../assets/aaguid.json';
 
 @Component({
   selector: 'app-two-factor',
@@ -29,15 +34,28 @@ export class TwoFactorComponent implements OnInit {
   checkIcon: IconDefinition = faCheck;
   spinnerIcon: IconDefinition = faSpinner;
   twoFactorProvidersEnabledStatus: TwoFactorProvidersEnabledStatus;
+  isPasskeysSupportedByBrowser = true;
+  userPasskeyCredentials: PasskeyCredential[];
+  isPasskeyCredentialsLoading: boolean = true;
+  passkeyProviderDetails: any = aaguids;
 
   constructor(
     private http: HttpClient,
     private authService: AuthService,
     private toastr: ToastrService,
-    private modalService: ModalService
+    private modalService: ModalService,
+    private passwordlessService: PasswordlessService
   ) {}
 
-  ngOnInit(): void {
+  ngOnInit() {
+    try {
+      this.passwordlessService.isBrowserSupported();
+    } catch {
+      this.isPasskeysSupportedByBrowser = false;
+    }
+
+    this.getPasskeyCredentials();
+
     this.http
       .get<TwoFactorProvidersEnabledStatusResponse>(
         `${environment.serverBaseUrl}/api/v1/two-factor`,
@@ -55,6 +73,87 @@ export class TwoFactorComponent implements OnInit {
             return;
           }
           this.toastr.error(error.error.message);
+        },
+      });
+  }
+
+  registerPasskey() {
+    this.modalService
+      .open(PassekysRegistrationSetupComponent, {
+        size: 'lg',
+        title: 'Create a Passkey',
+        submitButtonName: 'Create',
+      })
+      .subscribe({
+        next: (modalData) => {
+          if (modalData.action) {
+            this.getPasskeyCredentials();
+          }
+        },
+      });
+  }
+
+  private async getPasskeyCredentials() {
+    this.isPasskeyCredentialsLoading = true;
+
+    const { credentials, error } =
+      await this.passwordlessService.getUserPasskeyCredentials(
+        this.authService.getToken().split(' ')[1]
+      );
+
+    if (error) {
+      this.toastr.error(handleError(error));
+    }
+
+    this.userPasskeyCredentials = credentials.sort((a, b) => {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+    this.isPasskeyCredentialsLoading = false;
+  }
+
+  deletePasskeyCredential(credentialId: string, index: number) {
+    const helperText =
+      this.userPasskeyCredentials.length > 1
+        ? `Are you sure you want to remove (${
+            this.userPasskeyCredentials.find(
+              (x) => x.descriptor.id === credentialId
+            ).nickname
+          }) Passkey ?`
+        : `You are about to remove your last passkey (${
+            this.userPasskeyCredentials.find(
+              (x) => x.descriptor.id === credentialId
+            ).nickname
+          }). You will only be able to sign in with a password`;
+
+    this.modalService
+      .open(VerifyMasterPasswordComponent, {
+        title: 'Remove Passkey',
+        size: 'lg',
+        submitButtonName: 'Remove',
+        closeButtonName: 'Cancel',
+        data: {
+          helperText,
+        },
+      })
+      .subscribe({
+        next: async (modalData) => {
+          if (modalData.action) {
+            this.isPasskeyCredentialsLoading = true;
+
+            const { error } =
+              await this.passwordlessService.deleteUserPasskeyCredential(
+                credentialId,
+                this.authService.getToken().split(' ')[1]
+              );
+
+            if (error) {
+              this.toastr.error(handleError(error));
+            }
+
+            this.userPasskeyCredentials.splice(index, 1);
+            this.toastr.success('Passkey Deleted!');
+            this.isPasskeyCredentialsLoading = false;
+          }
         },
       });
   }
@@ -90,5 +189,22 @@ export class TwoFactorComponent implements OnInit {
           }
         },
       });
+  }
+
+  formatDateString(dateString: string): string {
+    const date: Date = new Date(dateString);
+
+    const options: Intl.DateTimeFormatOptions = {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true,
+    };
+
+    let formattedDate: string = date.toLocaleString('en-US', options);
+
+    return formattedDate;
   }
 }

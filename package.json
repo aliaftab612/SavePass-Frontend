@@ -31,6 +31,7 @@
     "crypto-js": "^4.1.1",
     "ngx-cookie-service": "^15.0.0",
     "ngx-toastr": "^16.2.0",
+    "passkeys-prf-client": "^1.0.59",
     "rxjs": "~7.5.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.12.0"

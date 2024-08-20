@@ -78,45 +78,135 @@
         With passkeys on your devices, you don’t need to remember complex
         passwords. Passkeys are encrypted digital keys you create using your
         fingerprint, face, or screen lock. Most passkeys are saved to your
-        password manager, so you can sign in on other devices. With security
-        keys, your encrypted digital key stays on a small, dedicated device.
-        Give your security key a nickname so you know which key(s) you
-        registered at a later point in time.
+        password manager, so you can sign in on other devices.
       </p>
-
+      <div
+        *ngIf="isPasskeysSupportedByBrowser"
+        class="flex items-center rounded-lg border-[1px] border-blue-300 bg-blue-50 p-2.5 text-sm text-blue-800 dark:border-blue-800 dark:bg-slate-800 dark:text-blue-400"
+        role="alert"
+      >
+        <svg
+          class="me-3 inline h-4 w-4 flex-shrink-0"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path
+            d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"
+          />
+        </svg>
+        <span class="sr-only">Info</span>
+        <div>
+          Only passkeys that support PRF (Pseudorandom Function) can be added,
+          as we use it for encryption key generation.
+        </div>
+      </div>
+      <div
+        *ngIf="isPasskeysSupportedByBrowser"
+        class="flex items-center rounded-lg border-[1px] border-blue-300 bg-blue-50 p-2.5 text-sm text-blue-800 dark:border-blue-800 dark:bg-slate-800 dark:text-blue-400"
+        role="alert"
+      >
+        <svg
+          class="me-3 inline h-4 w-4 flex-shrink-0"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path
+            d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"
+          />
+        </svg>
+        <span class="sr-only">Info</span>
+        <div>Passkeys bypass the need for two-factor authentication (2FA).</div>
+      </div>
+      <div
+        *ngIf="!isPasskeysSupportedByBrowser"
+        class="flex items-center rounded-lg border-[1px] border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-800 dark:border-yellow-800 dark:bg-slate-800 dark:text-yellow-300"
+        role="alert"
+      >
+        <svg
+          class="me-3 inline h-4 w-4 flex-shrink-0"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path
+            d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"
+          />
+        </svg>
+        <span class="sr-only">Info</span>
+        <div>
+          You can't create a passkey because your current browser does not
+          support passkeys.
+        </div>
+      </div>
       <button
+        *ngIf="isPasskeysSupportedByBrowser"
+        (click)="registerPasskey()"
         class="w-fit rounded-md bg-slate-900 px-3 py-2 font-bold text-white hover:bg-black/80 dark:bg-sky-500 dark:hover:bg-sky-500/80"
       >
         Create a passkey
       </button>
-      <div class="rounded-lg p-6 shadow dark:bg-slate-700">
-        <div class="mb-4 flex items-center justify-between">
-          <div class="flex items-center space-x-2">
-            <img
-              src="https://www.google.com/favicon.ico"
-              alt="Google Icon"
-              class="h-6 w-6"
-            />
-            <h2 class="text-lg font-medium text-gray-900 dark:text-white">
-              Passkey 1
-            </h2>
+      <fa-icon
+        *ngIf="isPasskeyCredentialsLoading"
+        class="m-auto text-slate-900 dark:text-sky-500"
+        [icon]="spinnerIcon"
+        [spin]="true"
+        size="2xl"
+      >
+      </fa-icon>
+      <div
+        *ngIf="!isPasskeyCredentialsLoading"
+        class="flex flex-col justify-center gap-3"
+      >
+        <div
+          *ngFor="let credential of userPasskeyCredentials; let i = index"
+          class="rounded-lg p-6 shadow dark:bg-slate-700"
+        >
+          <div class="mb-4 flex items-center justify-between">
+            <div class="flex items-center justify-center gap-2">
+              <img
+                *ngIf="passkeyProviderDetails[credential.aaGuid]"
+                [src]="passkeyProviderDetails[credential.aaGuid].icon_light"
+                alt="Passkey Provider Icon"
+                class="block h-8 w-8 dark:hidden"
+              />
+              <img
+                *ngIf="passkeyProviderDetails[credential.aaGuid]"
+                [src]="passkeyProviderDetails[credential.aaGuid].icon_dark"
+                alt="Passkey Provider Icon"
+                class="hidden h-8 w-8 dark:block"
+              />
+              <h2 class="text-lg font-medium text-gray-900 dark:text-white">
+                {{ credential.nickname }}
+              </h2>
+            </div>
+            <button
+              (click)="deletePasskeyCredential(credential.descriptor.id, i)"
+              class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+            >
+              Remove
+            </button>
           </div>
-          <button
-            class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-          >
-            Remove
-          </button>
-        </div>
-        <p class="text-sm text-gray-500 dark:text-gray-400">
-          Saved with Google Password Manager 16.2 on April 11, 2023, 12:01am
-        </p>
-        <div class="mt-4">
-          <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Last used
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            Saved with
+            {{ passkeyProviderDetails[credential.aaGuid]?.name || "Unknown" }}
+            on
+            {{ credential.device }}
+            on
+            {{ formatDateString(credential.createdAt) }}
           </p>
-          <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            April 11, 2023, 3:42pm
-          </p>
+          <div class="mt-4">
+            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Last used
+            </p>
+            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+              {{ formatDateString(credential.lastUsedAt) }}
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -133,7 +223,7 @@
       </h2>
       <fa-icon
         *ngIf="!twoFactorProvidersEnabledStatus"
-        class="text-slate-900 dark:text-sky-500"
+        class="m-auto text-slate-900 dark:text-sky-500"
         [icon]="spinnerIcon"
         [spin]="true"
         size="2xl"

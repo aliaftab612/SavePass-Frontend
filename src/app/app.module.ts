@@ -28,6 +28,9 @@ import { TotpAuthenticationSetupComponent } from './settings/two-factor/totp-aut
 import { TwoFactorAuthComponent } from './auth/two-factor-auth/two-factor-auth.component';
 import { QRCodeModule } from 'angularx-qrcode';
 import { ProfilePhotoCropperComponent } from './profile-photo-cropper/profile-photo-cropper.component';
+import { PassekysRegistrationSetupComponent } from './settings/two-factor/passkeys-registration-setup/passekys-registration-setup/passekys-registration-setup.component';
+import { PasswordlessService } from 'passkeys-prf-client';
+import { environment } from 'src/environments/environment';
 
 export function initializeUserData(
   authService: AuthService
@@ -55,6 +58,7 @@ export function initializeUserData(
     TotpAuthenticationSetupComponent,
     TwoFactorAuthComponent,
     ProfilePhotoCropperComponent,
+    PassekysRegistrationSetupComponent,
   ],
   imports: [
     BrowserModule,
@@ -79,6 +83,14 @@ export function initializeUserData(
     provideToastr({
       closeButton: true,
     }),
+    {
+      provide: PasswordlessService,
+      useFactory: () =>
+        new PasswordlessService(
+          environment.passwordlessDevPublicAPIKey,
+          environment.passwordlessDevPublicAPIUrl
+        ),
+    },
   ],
   bootstrap: [AppComponent],
 })

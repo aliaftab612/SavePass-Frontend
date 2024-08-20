@@ -73,3 +73,9 @@ interface UpdateProfilePhotoResponse {
   status: string;
   data: { profilePhotoUrl: string };
 }
+
+export declare type EncryptVaultEncryptionKeyResult = {
+  publicRSAKey: string;
+  encryptedPrivateRSAKey: string;
+  encryptedVaultEncryptionKey: string;
+};

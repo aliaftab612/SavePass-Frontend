@@ -1,5 +1,8 @@
 import { PBKDF2, AES, enc, algo, lib } from 'crypto-js';
-import { AuthenticationHashedKeys } from 'index';
+import {
+  AuthenticationHashedKeys,
+  EncryptVaultEncryptionKeyResult,
+} from 'index';
 import { GeneralPassword } from '../general-passwords/general-password.model';
 
 export class CryptoHelper {
@@ -157,5 +160,133 @@ export class CryptoHelper {
       cipherParams.salt = enc.Hex.parse(cipherParamsArray[2]);
     }
     return cipherParams;
+  }
+
+  public static async encryptVaultEncryptionKeyUsingPasskeyPrfKey(
+    prfkey: string,
+    vaultEncryptionKey: string,
+    salt: string,
+    hashIterations = 600
+  ): Promise<EncryptVaultEncryptionKeyResult> {
+    const hashedPrfKey = this.pkbfd2SHA256(prfkey, salt, hashIterations);
+
+    const { publicKey: publicRSAKey, privateKey: privateRSAKey } =
+      await this.generateRSAKeyPair();
+
+    const encryptedVaultEncryptionKey = await this.encryptRSA(
+      vaultEncryptionKey,
+      publicRSAKey
+    );
+
+    const encryptedPrivateRSAKey = this.encryptAES256(
+      privateRSAKey,
+      hashedPrfKey
+    );
+
+    return {
+      publicRSAKey,
+      encryptedPrivateRSAKey,
+      encryptedVaultEncryptionKey,
+    };
+  }
+
+  private static async generateRSAKeyPair() {
+    // Generate RSA key pair
+    const keyPair = await globalThis.crypto.subtle.generateKey(
+      {
+        name: 'RSA-OAEP',
+        modulusLength: 2048, // Key length
+        publicExponent: new Uint8Array([1, 0, 1]), // 65537
+        hash: 'SHA-256', // Use SHA-256 with RSA
+      },
+      true, // Whether the key is extractable (i.e., can be exported)
+      ['encrypt', 'decrypt'] // Can be used for these operations
+    );
+
+    // Export the keys to a format that can be used
+    const publicKey = await globalThis.crypto.subtle.exportKey(
+      'spki',
+      keyPair.publicKey
+    );
+    const privateKey = await globalThis.crypto.subtle.exportKey(
+      'pkcs8',
+      keyPair.privateKey
+    );
+
+    return {
+      publicKey: this.arrayBufferToBase64(publicKey),
+      privateKey: this.arrayBufferToBase64(privateKey),
+    };
+  }
+
+  private static arrayBufferToBase64(buffer: ArrayBuffer): string {
+    const binary = String.fromCharCode(...new Uint8Array(buffer));
+    return globalThis.btoa(binary);
+  }
+
+  private static async encryptRSA(
+    plaintext: string,
+    publicKeyBase64: string
+  ): Promise<string> {
+    const publicKeyBuffer = this.base64ToArrayBuffer(publicKeyBase64);
+    const publicKey = await globalThis.crypto.subtle.importKey(
+      'spki',
+      publicKeyBuffer,
+      {
+        name: 'RSA-OAEP',
+        hash: 'SHA-256',
+      },
+      true,
+      ['encrypt']
+    );
+
+    const encodedText = new TextEncoder().encode(plaintext);
+    const encrypted = await globalThis.crypto.subtle.encrypt(
+      {
+        name: 'RSA-OAEP',
+      },
+      publicKey,
+      encodedText
+    );
+
+    return this.arrayBufferToBase64(encrypted);
+  }
+
+  private static base64ToArrayBuffer(base64: string): ArrayBuffer {
+    const binaryString = globalThis.atob(base64);
+    const binaryLength = binaryString.length;
+    const bytes = new Uint8Array(binaryLength);
+    for (let i = 0; i < binaryLength; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes.buffer;
+  }
+
+  private static async decryptRSA(
+    encryptedTextBase64: string,
+    privateKeyBase64: string
+  ): Promise<string> {
+    const privateKeyBuffer = this.base64ToArrayBuffer(privateKeyBase64);
+    const privateKey = await globalThis.crypto.subtle.importKey(
+      'pkcs8',
+      privateKeyBuffer,
+      {
+        name: 'RSA-OAEP',
+        hash: 'SHA-256',
+      },
+      true,
+      ['decrypt']
+    );
+
+    const encryptedBuffer = this.base64ToArrayBuffer(encryptedTextBase64);
+    const decrypted = await globalThis.crypto.subtle.decrypt(
+      {
+        name: 'RSA-OAEP',
+      },
+      privateKey,
+      encryptedBuffer
+    );
+
+    return new TextDecoder().decode(decrypted);
   }
 }
