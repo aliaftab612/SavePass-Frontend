@@ -11,7 +11,9 @@ export class PassekysRegistrationSetupDataService {
     credentialId: string,
     publicRSAKey: string,
     encryptedPrivateRSAKey: string,
-    encryptedVaultEncryptionKey: string
+    encryptedVaultEncryptionKey: string,
+    loginHash: string,
+    isPasskeyReAuth: boolean
   ): Promise<string> {
     return new Promise((resolve, reject) => {
       this.http
@@ -25,6 +27,8 @@ export class PassekysRegistrationSetupDataService {
             publicRSAKey,
             encryptedPrivateRSAKey,
             encryptedVaultEncryptionKey,
+            password: loginHash,
+            isPasskeyReAuth,
           },
           {
             headers: { Authorization: this.authService.getToken() },

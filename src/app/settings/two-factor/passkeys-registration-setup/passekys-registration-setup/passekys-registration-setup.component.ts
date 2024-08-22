@@ -46,7 +46,11 @@ export class PassekysRegistrationSetupComponent
           '',
           true,
           this.authService.getToken().split(' ')[1],
-          this.form.value.passkeyNickname
+          this.form.value.passkeyNickname,
+          {
+            password: this.modalData.loginHash,
+            isPasskeyReAuth: this.modalData.isPasskeyReAuth,
+          }
         );
 
       if (error) {
@@ -70,7 +74,9 @@ export class PassekysRegistrationSetupComponent
             passkeyCredentialId,
             publicRSAKey,
             encryptedPrivateRSAKey,
-            encryptedVaultEncryptionKey
+            encryptedVaultEncryptionKey,
+            this.modalData.loginHash,
+            this.modalData.isPasskeyReAuth
           );
       } catch (err: any) {
         if (err?.status == 401) {
@@ -81,6 +87,10 @@ export class PassekysRegistrationSetupComponent
         const { error: passkeyDeletionError } =
           await this.passwordlessService.deleteUserPasskeyCredential(
             passkeyCredentialId,
+            {
+              password: this.modalData.loginHash,
+              isPasskeyReAuth: this.modalData.isPasskeyReAuth,
+            },
             this.authService.getToken().split(' ')[1]
           );
 

@@ -11,11 +11,12 @@ import { environment } from 'src/environments/environment';
 export class TotpAuthenticationSetupService {
   constructor(private http: HttpClient, private authService: AuthService) {}
 
-  getAuthenticator(loginHash: string) {
+  getAuthenticator(loginHash: string, isPasskeyReAuth: boolean) {
     return this.http.post<GetOrEnableAuthenticatorResponse>(
       `${environment.serverBaseUrl}/api/v1/two-factor/get-authenticator`,
       {
         password: loginHash,
+        isPasskeyReAuth,
       },
       {
         headers: { Authorization: this.authService.getToken() },
@@ -23,13 +24,19 @@ export class TotpAuthenticationSetupService {
     );
   }
 
-  enableAuthenticator(loginHash: string, secret: string, token: string) {
+  enableAuthenticator(
+    loginHash: string,
+    secret: string,
+    token: string,
+    isPasskeyReAuth: boolean
+  ) {
     return this.http.patch<GetOrEnableAuthenticatorResponse>(
       `${environment.serverBaseUrl}/api/v1/two-factor/authenticator`,
       {
         password: loginHash,
         secret,
         token,
+        isPasskeyReAuth,
       },
       {
         headers: { Authorization: this.authService.getToken() },
@@ -37,11 +44,12 @@ export class TotpAuthenticationSetupService {
     );
   }
 
-  disableAuthenticator(loginHash: string) {
+  disableAuthenticator(loginHash: string, isPasskeyReAuth: boolean) {
     return this.http.patch<DisableAuthenticatorResponse>(
       `${environment.serverBaseUrl}/api/v1/two-factor/disable-authenticator`,
       {
         password: loginHash,
+        isPasskeyReAuth,
       },
       {
         headers: { Authorization: this.authService.getToken() },

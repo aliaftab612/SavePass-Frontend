@@ -44,7 +44,10 @@ export class TotpAuthenticationSetupComponent
 
   getAuthenticator() {
     this.totpAuthSetupService
-      .getAuthenticator(this.modalData.loginHash)
+      .getAuthenticator(
+        this.modalData.loginHash,
+        this.modalData.isPasskeyReAuth
+      )
       .subscribe({
         next: (data) => {
           this.secret = data.data.secret;
@@ -97,7 +100,10 @@ export class TotpAuthenticationSetupComponent
   disableAuthenticator() {
     return new Promise((resolve, reject) => {
       this.totpAuthSetupService
-        .disableAuthenticator(this.modalData.loginHash)
+        .disableAuthenticator(
+          this.modalData.loginHash,
+          this.modalData.isPasskeyReAuth
+        )
         .subscribe({
           next: (data) => {
             this.toastr.success('2FA with Authenticator App Disabled!');
@@ -118,7 +124,12 @@ export class TotpAuthenticationSetupComponent
   enableAuthenticator(token: string) {
     return new Promise((resolve, reject) => {
       this.totpAuthSetupService
-        .enableAuthenticator(this.modalData.loginHash, this.secret, token)
+        .enableAuthenticator(
+          this.modalData.loginHash,
+          this.secret,
+          token,
+          this.modalData.isPasskeyReAuth
+        )
         .subscribe({
           next: (data) => {
             this.toastr.success('2FA with Authenticator App Enabled!');

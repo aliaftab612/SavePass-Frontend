@@ -20,6 +20,7 @@ import { PasswordlessService } from 'passkeys-prf-client';
 import { PasskeyCredential } from 'passkeys-prf-client/dist/types';
 import { handleError } from 'src/app/shared/PassskeyAuthErrorHandler';
 import aaguids from './../../../assets/aaguid.json';
+import PasskeyReAuthScopes from 'src/app/shared/passkeyReAuthScopes';
 
 @Component({
   selector: 'app-two-factor',
@@ -79,15 +80,35 @@ export class TwoFactorComponent implements OnInit {
 
   registerPasskey() {
     this.modalService
-      .open(PassekysRegistrationSetupComponent, {
+      .open(VerifyMasterPasswordComponent, {
         size: 'lg',
-        title: 'Create a Passkey',
-        submitButtonName: 'Create',
+        title: 'Confirm Your Identity',
+        submitButtonName: 'Continue',
+        closeButtonName: 'Close',
+        data: {
+          scope: PasskeyReAuthScopes.CREATE_PASSKEY,
+        },
       })
       .subscribe({
         next: (modalData) => {
           if (modalData.action) {
-            this.getPasskeyCredentials();
+            this.modalService
+              .open(PassekysRegistrationSetupComponent, {
+                size: 'lg',
+                title: 'Create a Passkey',
+                submitButtonName: 'Create',
+                data: {
+                  loginHash: modalData.data.loginHash,
+                  isPasskeyReAuth: modalData.data.isPasskeyReAuth,
+                },
+              })
+              .subscribe({
+                next: (modalData) => {
+                  if (modalData.action) {
+                    this.getPasskeyCredentials();
+                  }
+                },
+              });
           }
         },
       });
@@ -133,6 +154,7 @@ export class TwoFactorComponent implements OnInit {
         closeButtonName: 'Cancel',
         data: {
           helperText,
+          scope: PasskeyReAuthScopes.REMOVE_PASSKEY,
         },
       })
       .subscribe({
@@ -143,11 +165,17 @@ export class TwoFactorComponent implements OnInit {
             const { error } =
               await this.passwordlessService.deleteUserPasskeyCredential(
                 credentialId,
+                {
+                  password: modalData.data.loginHash,
+                  isPasskeyReAuth: modalData.data.isPasskeyReAuth,
+                },
                 this.authService.getToken().split(' ')[1]
               );
 
             if (error) {
               this.toastr.error(handleError(error));
+              this.isPasskeyCredentialsLoading = false;
+              return;
             }
 
             this.userPasskeyCredentials.splice(index, 1);
@@ -162,9 +190,12 @@ export class TwoFactorComponent implements OnInit {
     this.modalService
       .open(VerifyMasterPasswordComponent, {
         size: 'lg',
-        title: 'Verify Password',
+        title: 'Confirm Your Identity',
         submitButtonName: 'Continue',
         closeButtonName: 'Close',
+        data: {
+          scope: PasskeyReAuthScopes.MANAGE_TOTP_2FA,
+        },
       })
       .subscribe({
         next: (modalData) => {
@@ -176,7 +207,8 @@ export class TwoFactorComponent implements OnInit {
                 closeButtonName: 'Close',
                 submitEnabled: false,
                 data: {
-                  loginHash: modalData.data,
+                  loginHash: modalData.data.loginHash,
+                  isPasskeyReAuth: modalData.data.isPasskeyReAuth,
                 },
               })
               .subscribe({
