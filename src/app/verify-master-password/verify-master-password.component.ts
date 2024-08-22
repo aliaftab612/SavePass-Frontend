@@ -48,8 +48,7 @@ export class VerifyMasterPasswordComponent
     this.modalComponentRef.instance.submitEnabled = false;
     const { credentials, error } =
       await this.passwordlessService.getUserPasskeyCredentials(
-        this.authService.getToken().split(' ')[1],
-        this.authService.getUser()._id
+        this.authService.getToken().split(' ')[1]
       );
     this.pageLoading = false;
     if (error) {
