@@ -79,3 +79,15 @@ export declare type EncryptVaultEncryptionKeyResult = {
   encryptedPrivateRSAKey: string;
   encryptedVaultEncryptionKey: string;
 };
+
+export declare type PasskeyEncryptedEncryptionKey = {
+  credentialId: string;
+  publicRSAKey: string;
+  encryptedPrivateRSAKey: string;
+  encryptedVaultEncryptionKey: string;
+};
+
+export declare type PasskeyEncryptedEncryptionKeyHTTPResponse = {
+  status: string;
+  data: PasskeyEncryptedEncryptionKey;
+};

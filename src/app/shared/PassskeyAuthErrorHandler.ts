@@ -8,7 +8,7 @@ export const handleError = (error: PasskeysAuthError): string => {
   if (error.from === ErrorFrom.BrowserWebAuthn) {
     switch (error.errorCode) {
       case ErrorCodes.NotAllowedError:
-        errMessage = 'Passkey creation was canceled by the user.';
+        errMessage = 'Passkey creation/sign-in was canceled by the user.';
         break;
       case ErrorCodes.FailedCreateCredential:
         errMessage = 'Failed to create a new passkey.';

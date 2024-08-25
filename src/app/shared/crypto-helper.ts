@@ -2,6 +2,7 @@ import { PBKDF2, AES, enc, algo, lib } from 'crypto-js';
 import {
   AuthenticationHashedKeys,
   EncryptVaultEncryptionKeyResult,
+  PasskeyEncryptedEncryptionKey,
 } from 'index';
 import { GeneralPassword } from '../general-passwords/general-password.model';
 
@@ -162,11 +163,32 @@ export class CryptoHelper {
     return cipherParams;
   }
 
+  public static async decryptVaultEncryptionKeyUsingPasskeyPrfKey(
+    prfkey: string,
+    passkeyEncryptedEncryptionKey: PasskeyEncryptedEncryptionKey,
+    salt: string,
+    hashIterations = 600000
+  ): Promise<string> {
+    const hashedPrfKey = this.pkbfd2SHA256(prfkey, salt, hashIterations);
+
+    const privateRSAKey = this.decryptAES256(
+      passkeyEncryptedEncryptionKey.encryptedPrivateRSAKey,
+      hashedPrfKey
+    );
+
+    const vaultEncryptionKey = await this.decryptRSA(
+      passkeyEncryptedEncryptionKey.encryptedVaultEncryptionKey,
+      privateRSAKey
+    );
+
+    return vaultEncryptionKey;
+  }
+
   public static async encryptVaultEncryptionKeyUsingPasskeyPrfKey(
     prfkey: string,
     vaultEncryptionKey: string,
     salt: string,
-    hashIterations = 600
+    hashIterations = 600000
   ): Promise<EncryptVaultEncryptionKeyResult> {
     const hashedPrfKey = this.pkbfd2SHA256(prfkey, salt, hashIterations);
 

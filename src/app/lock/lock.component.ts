@@ -10,6 +10,9 @@ import {
 import { AuthService } from '../auth/auth.service';
 import { NgForm } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { PasswordlessService } from 'passkeys-prf-client';
+import { handleError } from '../shared/PassskeyAuthErrorHandler';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-lock',
@@ -25,8 +28,15 @@ export class LockComponent implements OnInit, OnDestroy {
   isUnlockEventStartedSubscription: Subscription;
   passwordHiddenImg: IconDefinition = faEye;
   hidePassword: boolean = true;
+  reAuthUsingPasskey = false;
+  noPasskeyRegistered = true;
+  pageLoading = true;
 
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private passwordlessService: PasswordlessService,
+    private toaster: ToastrService
+  ) {}
 
   ngOnDestroy(): void {
     if (this.isUnlockEventStartedSubscription) {
@@ -40,7 +50,7 @@ export class LockComponent implements OnInit, OnDestroy {
       this.passwordHiddenImg === faEye ? faEyeSlash : faEye;
   }
 
-  ngOnInit(): void {
+  async ngOnInit() {
     this.authService.isLockedEvent.next(true);
 
     this.username = this.authService.getUser().email;
@@ -55,19 +65,66 @@ export class LockComponent implements OnInit, OnDestroy {
           }
         },
       });
+
+    const { credentials, error } =
+      await this.passwordlessService.getUserPasskeyCredentials(
+        this.authService.getToken().split(' ')[1]
+      );
+
+    this.pageLoading = false;
+    if (error) {
+      const errMessage = handleError(error);
+
+      if (errMessage) {
+        this.toaster.error(errMessage);
+      }
+      this.reAuthUsingPasskey = false;
+      return;
+    }
+
+    if (credentials.length) {
+      this.noPasskeyRegistered = false;
+    } else {
+      this.reAuthUsingPasskey = false;
+    }
   }
 
   logout() {
     this.authService.logout();
   }
 
-  unlock(form: NgForm) {
+  async unlock(form: NgForm) {
     if (this.unlockStarted) return;
     if (form.valid) {
-      this.authService.regenerateEncryptionKeyAndUnlock(
-        form.value.password,
-        this.username
-      );
+      if (!this.reAuthUsingPasskey) {
+        this.authService.regenerateEncryptionKeyAndUnlock(
+          form.value.password,
+          this.username
+        );
+      } else {
+        this.authService.isUnlockEventStarted.next(true);
+        const { prfKey, passkeyCredentialId, error } =
+          await this.passwordlessService.reAuthWithAlias(
+            this.authService.getUser().email,
+            true,
+            this.authService.getToken().split(' ')[1]
+          );
+
+        if (error) {
+          this.authService.isUnlockEventStarted.next(false);
+          this.toaster.error(handleError(error));
+          return;
+        }
+
+        await this.authService.generateEncyptionKeyUsingPasskey(
+          prfKey,
+          passkeyCredentialId
+        );
+      }
     }
+  }
+
+  changeReAuthMethod() {
+    this.reAuthUsingPasskey = !this.reAuthUsingPasskey;
   }
 }

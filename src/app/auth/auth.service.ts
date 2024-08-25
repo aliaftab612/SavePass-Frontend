@@ -7,6 +7,8 @@ import { environment } from 'src/environments/environment';
 import {
   AuthenticationHashedKeys,
   LoginSignupResponse,
+  PasskeyEncryptedEncryptionKey,
+  PasskeyEncryptedEncryptionKeyHTTPResponse,
   PreLoginResponse,
   UpdateAppLockoutTime,
   UserDataResponse,
@@ -30,6 +32,7 @@ export class AuthService {
   isAuthenticatedEvent: Subject<User> = new Subject<User>();
   isAuthenticationFailed: Subject<boolean> = new Subject<boolean>();
   authWorker: Worker = null;
+  passkeyAuthWorker: Worker = null;
   private token: string = null;
   private localAuthorizationHash: string = null;
   isUnlockEventStarted: Subject<boolean> = new Subject<boolean>();
@@ -58,6 +61,7 @@ export class AuthService {
       this.localAuthorizationHash = sessionStorage.getItem(
         'localAuthorizationHash'
       );
+      this.hashIterations = +sessionStorage.getItem('hashIterations');
 
       this.getUserData().subscribe({
         next: (userData: UserDataResponse) => {
@@ -512,5 +516,110 @@ export class AuthService {
     return this.localAuthorizationHash
       ? this.localAuthorizationHash.split('').join('')
       : null;
+  }
+
+  async generateEncyptionKeyUsingPasskey(
+    prfkey: string,
+    credentialId: string,
+    isSignIn = false
+  ) {
+    try {
+      const passkeyEncryptedEncryptionKey =
+        await this.getPasskeyEncryptedEncryptionKey(credentialId);
+
+      this.encryptionKey = await this.decryptVaultKeyUsingPrfKey(
+        prfkey,
+        passkeyEncryptedEncryptionKey
+      );
+
+      if (!this.encryptionKey)
+        throw new Error('Error generating encryption key!');
+
+      if (!isSignIn) {
+        this.startInactivityLockTimer();
+        this.isLockedEvent.next(false);
+        this.isUnlockEventStarted.next(false);
+        this._location.back();
+        return;
+      }
+    } catch (err: any) {
+      if (!isSignIn) {
+        this.isUnlockEventStarted.next(false);
+      }
+
+      if (err.status) {
+        if (err.status == 401) {
+          this.logout();
+          return;
+        }
+        this.toastr.error(err.error.message);
+      } else {
+        this.toastr.error(err.message);
+      }
+    }
+  }
+
+  private async decryptVaultKeyUsingPrfKey(
+    prfKey: string,
+    passkeyEncryptedEncryptionKey: PasskeyEncryptedEncryptionKey
+  ): Promise<string> {
+    return new Promise(async (resolve, reject) => {
+      if (typeof Worker !== 'undefined') {
+        if (!this.passkeyAuthWorker) {
+          this.passkeyAuthWorker = new Worker(
+            new URL('./passkeyAuth.worker.ts', import.meta.url)
+          );
+        }
+
+        this.passkeyAuthWorker.onmessage = ({ data }) => {
+          resolve(data.result);
+        };
+        this.passkeyAuthWorker.onerror = (err) => {
+          reject(err);
+        };
+        this.passkeyAuthWorker.postMessage({
+          prfKey,
+          passkeyEncryptedEncryptionKey,
+          salt: this.getUser().email,
+          hashIterations: DEFAULT_HASH_ITERATIONS,
+        });
+      } else {
+        try {
+          const result =
+            await CryptoHelper.decryptVaultEncryptionKeyUsingPasskeyPrfKey(
+              prfKey,
+              passkeyEncryptedEncryptionKey,
+              this.getUser().email,
+              DEFAULT_HASH_ITERATIONS
+            );
+
+          resolve(result);
+        } catch (err: any) {
+          reject(err);
+        }
+      }
+    });
+  }
+
+  private getPasskeyEncryptedEncryptionKey(
+    credentialId: string
+  ): Promise<PasskeyEncryptedEncryptionKey> {
+    return new Promise((resolve, reject) => {
+      this.http
+        .get<PasskeyEncryptedEncryptionKeyHTTPResponse>(
+          `${environment.serverBaseUrl}/api/v1/passkeys-auth/passkey-encrypted-encryption-key/${credentialId}`,
+          {
+            headers: { Authorization: this.token },
+          }
+        )
+        .subscribe({
+          next: (data) => {
+            resolve(data.data);
+          },
+          error: (err: any) => {
+            reject(err);
+          },
+        });
+    });
   }
 }

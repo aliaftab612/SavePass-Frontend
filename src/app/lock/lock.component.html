@@ -12,14 +12,38 @@
         </fa-icon>
       </div>
       <h2 class="text-center text-xl font-bold leading-tight dark:text-white">
-        SavePass is locked. Verify your password to continue.
+        SavePass is locked.
+        {{
+          pageLoading
+            ? ""
+            : reAuthUsingPasskey
+            ? "Verify using your passkey to continue."
+            : "Verify your password to continue."
+        }}
       </h2>
-      <form #form="ngForm" class="mt-8" (ngSubmit)="unlock(form)">
+      <div
+        *ngIf="pageLoading"
+        class="flex items-center justify-center px-3.5 py-8"
+      >
+        <fa-icon
+          class="text-slate-900 dark:text-sky-500"
+          [icon]="loadingSpinnerIcon"
+          [spin]="true"
+          size="2xl"
+        >
+        </fa-icon>
+      </div>
+      <form
+        *ngIf="!pageLoading"
+        #form="ngForm"
+        class="mt-8"
+        (ngSubmit)="unlock(form)"
+      >
         <div *ngIf="username" class="mb-2.5 text-gray-500 dark:text-gray-400">
           Logged in as {{ username }}
         </div>
         <div class="space-y-5">
-          <div>
+          <div *ngIf="!reAuthUsingPasskey">
             <div class="flex items-center justify-between">
               <label
                 for="Password"
@@ -88,7 +112,7 @@
               class="flex cursor-not-allowed items-center justify-center gap-2 rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black dark:bg-sky-500 dark:hover:bg-sky-500/80"
             >
               <fa-icon class="text-white" [icon]="openLockIcon"> </fa-icon>
-              Unlock
+              {{ reAuthUsingPasskey ? "Unlock using passkey" : "Unlock" }}
             </button>
             <button
               type="button"
@@ -96,6 +120,19 @@
               class="rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-600/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
             >
               Log out
+            </button>
+          </div>
+          <div
+            *ngIf="!noPasskeyRegistered"
+            class="flex items-center gap-2 text-gray-500 dark:text-gray-300"
+          >
+            Use Alternate Method? -
+            <button
+              type="button"
+              (click)="changeReAuthMethod()"
+              class="cursor-not-allowed rounded-md bg-slate-900 px-2 py-1 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black dark:bg-sky-500 dark:hover:bg-sky-500/80"
+            >
+              {{ reAuthUsingPasskey ? "Password" : "Passkey" }}
             </button>
           </div>
         </div>

@@ -57,6 +57,8 @@ export class VerifyMasterPasswordComponent
       if (errMessage) {
         this.toastr.error(errMessage);
       }
+      this.reAuthUsingPasskey = false;
+      return;
     }
 
     this.modalComponentRef.instance.submitEnabled = true;
