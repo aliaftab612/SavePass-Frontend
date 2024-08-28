@@ -22,12 +22,14 @@ export class AuthComponent implements OnDestroy {
   loadingSpinnerIcon: IconDefinition = faSpinner;
   passwordHiddenImg: IconDefinition = faEye;
   hidePassword: boolean = true;
+  passkeySignIn = false;
 
   constructor(private authService: AuthService) {}
   ngOnDestroy(): void {
     if (this.isAuthenticationFailedSubscription) {
       this.isAuthenticationFailedSubscription.unsubscribe();
     }
+    this.authService.abortPasskeyAuth();
   }
 
   togglePasswordVisibility() {
@@ -46,12 +48,17 @@ export class AuthComponent implements OnDestroy {
   onAuthenticationClick(form: NgForm) {
     if (this.showLoadingSpinner) return;
     if (form.valid) {
-      this.authService.authenticate(
-        form.value.username,
-        form.value.password,
-        false,
-        !this.loginMode
-      );
+      if (this.passkeySignIn && this.loginMode) {
+        this.authService.signInUsingPasskey(form.value.username);
+      } else {
+        this.authService.authenticate(
+          form.value.username,
+          form.value.password,
+          false,
+          !this.loginMode
+        );
+      }
+
       this.showLoadingSpinner = true;
 
       this.isAuthenticationFailedSubscription =
@@ -70,5 +77,9 @@ export class AuthComponent implements OnDestroy {
     } else {
       this.isPasswordAndConfrimPasswordMaching = false;
     }
+  }
+
+  SwitchSignInMode() {
+    this.passkeySignIn = !this.passkeySignIn;
   }
 }

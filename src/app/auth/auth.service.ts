@@ -22,6 +22,8 @@ import {
   errTypes,
 } from './auth-defaults.enum';
 import { ToastrService } from 'ngx-toastr';
+import { PasskeysAuthError, PasswordlessService } from 'passkeys-prf-client';
+import { handleError } from '../shared/PassskeyAuthErrorHandler';
 
 @Injectable({
   providedIn: 'root',
@@ -45,6 +47,7 @@ export class AuthService {
   private tempEmail: string = null;
   private tempLoginHash: string = null;
   private twoFactorSessionTimeout: NodeJS.Timeout = null;
+  private signedInUsingPasskey = false;
 
   constructor(
     private http: HttpClient,
@@ -52,7 +55,8 @@ export class AuthService {
     private _location: Location,
     private userIdle: UserIdleService,
     private route: ActivatedRoute,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private passwordlessService: PasswordlessService
   ) {}
 
   autoLogin = new Observable((subscriber) => {
@@ -62,6 +66,8 @@ export class AuthService {
         'localAuthorizationHash'
       );
       this.hashIterations = +sessionStorage.getItem('hashIterations');
+      this.signedInUsingPasskey =
+        sessionStorage.getItem('signedInUsingPasskey') === 'true';
 
       this.getUserData().subscribe({
         next: (userData: UserDataResponse) => {
@@ -82,6 +88,68 @@ export class AuthService {
         email,
       }
     );
+  }
+
+  async signInUsingPasskey(email: string) {
+    try {
+      clearTimeout(this.twoFactorSessionTimeout);
+      this.tempEmail = null;
+      this.tempLoginHash = null;
+
+      const { prfKey, passkeyCredentialId, authToken, username, error } =
+        await this.passwordlessService.signinWithAlias(email, true);
+
+      if (error) throw error;
+
+      this.token = 'Bearer ' + authToken;
+      sessionStorage.setItem('token', authToken);
+
+      await this.generateEncyptionKeyUsingPasskey(
+        prfKey,
+        passkeyCredentialId,
+        username,
+        true
+      );
+
+      this.hashIterations = await this.getUserHashIterations(username);
+      sessionStorage.setItem('hashIterations', this.hashIterations.toString());
+      this.signedInUsingPasskey = true;
+      sessionStorage.setItem(
+        'signedInUsingPasskey',
+        this.signedInUsingPasskey.toString()
+      );
+
+      this.initAppAfterAuthentication();
+    } catch (err: any) {
+      this.isAuthenticationFailed.next(true);
+
+      let errMsg;
+      if (err instanceof PasskeysAuthError) {
+        errMsg = handleError(err);
+      } else if (err?.status) {
+        errMsg = err.error.message;
+      } else if (err?.message) {
+        errMsg = err.message;
+      } else {
+        errMsg = 'Something went wrong! Please try again.';
+      }
+
+      this.toastr.error(errMsg);
+      this.removeSensitiveInfoWhenAuthFails();
+    }
+  }
+
+  private getUserHashIterations(email: string): Promise<number> {
+    return new Promise((resolve, reject) => {
+      this.getPreLoginConfig(email).subscribe({
+        next: (data: PreLoginResponse) => {
+          resolve(data.data.hashIterations);
+        },
+        error: (error) => {
+          reject(error);
+        },
+      });
+    });
   }
 
   authenticate(
@@ -183,16 +251,20 @@ export class AuthService {
     }
   }
 
-  private storeHashesAndKeysAndDoFuthurAuthentication(
+  private async storeHashesAndKeysAndDoFuthurAuthentication(
     data: AuthenticationHashedKeys,
     localAuthorization: boolean,
     isSignUp: boolean,
     email: string
   ) {
-    if (localAuthorization) {
+    if (localAuthorization || this.signedInUsingPasskey) {
       const loginHash = data.localLoginHash;
 
-      if (loginHash === sessionStorage.getItem('localAuthorizationHash')) {
+      if (
+        this.signedInUsingPasskey
+          ? await this.veryLoginHash(data.loginHash)
+          : loginHash === sessionStorage.getItem('localAuthorizationHash')
+      ) {
         this.encryptionKey = data.encryptionKey;
         this.isUnlockEventStarted.next(false);
         this.isLockedEvent.next(false);
@@ -245,6 +317,11 @@ export class AuthService {
 
           this.token = 'Bearer ' + data.token;
           sessionStorage.setItem('token', data.token);
+          this.signedInUsingPasskey = false;
+          sessionStorage.setItem(
+            'signedInUsingPasskey',
+            this.signedInUsingPasskey.toString()
+          );
           this.initAppAfterAuthentication(isSignUp);
         },
         error: (error) => {
@@ -312,6 +389,7 @@ export class AuthService {
     this.token = null;
     this.hashIterations = null;
     this.localAuthorizationHash = null;
+    this.signedInUsingPasskey = false;
     sessionStorage.clear();
   }
 
@@ -325,7 +403,7 @@ export class AuthService {
   }
 
   verifyMasterPassword(password: string, email: string): Promise<string> {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       if (typeof Worker !== 'undefined') {
         if (!this.authWorker) {
           this.authWorker = new Worker(
@@ -333,8 +411,12 @@ export class AuthService {
           );
         }
 
-        this.authWorker.onmessage = ({ data }) => {
-          if (data.keys.localLoginHash === this.localAuthorizationHash) {
+        this.authWorker.onmessage = async ({ data }) => {
+          if (
+            this.signedInUsingPasskey
+              ? await this.veryLoginHash(data.keys.loginHash)
+              : data.keys.localLoginHash === this.localAuthorizationHash
+          ) {
             resolve(data.keys.loginHash);
           } else {
             reject();
@@ -354,7 +436,11 @@ export class AuthService {
           false
         );
 
-        if (keys.localLoginHash === this.localAuthorizationHash) {
+        if (
+          this.signedInUsingPasskey
+            ? await this.veryLoginHash(keys.loginHash)
+            : keys.localLoginHash === this.localAuthorizationHash
+        ) {
           resolve(keys.loginHash);
         } else {
           reject();
@@ -425,6 +511,7 @@ export class AuthService {
     this.token = null;
     this.hashIterations = null;
     this.localAuthorizationHash = null;
+    this.signedInUsingPasskey = false;
     sessionStorage.clear();
 
     if (this.onTimeoutSubscription || this.onTimerStartSubscription) {
@@ -438,7 +525,7 @@ export class AuthService {
 
   regenerateEncryptionKeyAndUnlock(password: string, email: string) {
     this.isUnlockEventStarted.next(true);
-    this.authenticate(email, password, true);
+    this.authenticate(email, password, !this.signedInUsingPasskey);
   }
 
   lock() {
@@ -521,6 +608,7 @@ export class AuthService {
   async generateEncyptionKeyUsingPasskey(
     prfkey: string,
     credentialId: string,
+    email: string,
     isSignIn = false
   ) {
     try {
@@ -529,7 +617,8 @@ export class AuthService {
 
       this.encryptionKey = await this.decryptVaultKeyUsingPrfKey(
         prfkey,
-        passkeyEncryptedEncryptionKey
+        passkeyEncryptedEncryptionKey,
+        email
       );
 
       if (!this.encryptionKey)
@@ -545,6 +634,8 @@ export class AuthService {
     } catch (err: any) {
       if (!isSignIn) {
         this.isUnlockEventStarted.next(false);
+      } else {
+        throw err;
       }
 
       if (err.status) {
@@ -561,7 +652,8 @@ export class AuthService {
 
   private async decryptVaultKeyUsingPrfKey(
     prfKey: string,
-    passkeyEncryptedEncryptionKey: PasskeyEncryptedEncryptionKey
+    passkeyEncryptedEncryptionKey: PasskeyEncryptedEncryptionKey,
+    email: string
   ): Promise<string> {
     return new Promise(async (resolve, reject) => {
       if (typeof Worker !== 'undefined') {
@@ -580,7 +672,7 @@ export class AuthService {
         this.passkeyAuthWorker.postMessage({
           prfKey,
           passkeyEncryptedEncryptionKey,
-          salt: this.getUser().email,
+          salt: email,
           hashIterations: DEFAULT_HASH_ITERATIONS,
         });
       } else {
@@ -618,6 +710,37 @@ export class AuthService {
           },
           error: (err: any) => {
             reject(err);
+          },
+        });
+    });
+  }
+
+  isUserSignedInUsingPasskey(): boolean {
+    return this.signedInUsingPasskey ?? false;
+  }
+
+  abortPasskeyAuth() {
+    this.passwordlessService.signupOrSigninAbort();
+  }
+
+  private async veryLoginHash(loginHash: string): Promise<boolean> {
+    return new Promise((resolve) => {
+      this.http
+        .post(
+          `${environment.serverBaseUrl}/api/v1/verify-password`,
+          {
+            password: loginHash,
+          },
+          {
+            headers: { Authorization: this.token },
+          }
+        )
+        .subscribe({
+          next: () => {
+            resolve(true);
+          },
+          error: () => {
+            resolve(false);
           },
         });
     });

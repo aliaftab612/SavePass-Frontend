@@ -42,6 +42,7 @@ export class LockComponent implements OnInit, OnDestroy {
     if (this.isUnlockEventStartedSubscription) {
       this.isUnlockEventStartedSubscription.unsubscribe();
     }
+    this.passwordlessService.signupOrSigninAbort();
   }
 
   togglePasswordVisibility() {
@@ -50,10 +51,10 @@ export class LockComponent implements OnInit, OnDestroy {
       this.passwordHiddenImg === faEye ? faEyeSlash : faEye;
   }
 
-  async ngOnInit() {
+  ngOnInit() {
     this.authService.isLockedEvent.next(true);
-
     this.username = this.authService.getUser().email;
+    this.reAuthUsingPasskey = this.authService.isUserSignedInUsingPasskey();
 
     this.isUnlockEventStartedSubscription =
       this.authService.isUnlockEventStarted.subscribe({
@@ -66,6 +67,10 @@ export class LockComponent implements OnInit, OnDestroy {
         },
       });
 
+    this.isPasskeyUnlockPossible();
+  }
+
+  async isPasskeyUnlockPossible() {
     const { credentials, error } =
       await this.passwordlessService.getUserPasskeyCredentials(
         this.authService.getToken().split(' ')[1]
@@ -118,7 +123,8 @@ export class LockComponent implements OnInit, OnDestroy {
 
         await this.authService.generateEncyptionKeyUsingPasskey(
           prfKey,
-          passkeyCredentialId
+          passkeyCredentialId,
+          this.authService.getUser().email
         );
       }
     }

@@ -44,8 +44,14 @@ export class VerifyMasterPasswordComponent
     private toastr: ToastrService,
     private passwordlessService: PasswordlessService
   ) {}
-  async ngOnInit(): Promise<void> {
+  ngOnInit() {
     this.modalComponentRef.instance.submitEnabled = false;
+    this.reAuthUsingPasskey = this.authService.isUserSignedInUsingPasskey();
+
+    this.isPasskeyUnlockPossible();
+  }
+
+  async isPasskeyUnlockPossible() {
     const { credentials, error } =
       await this.passwordlessService.getUserPasskeyCredentials(
         this.authService.getToken().split(' ')[1]
@@ -69,6 +75,7 @@ export class VerifyMasterPasswordComponent
       this.reAuthUsingPasskey = false;
     }
   }
+
   ngOnDestroy(): void {
     this.modalData = null;
     this.passwordlessService.signupOrSigninAbort();
